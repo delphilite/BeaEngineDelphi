@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CONFIG>
+  <ProjectOptions>
+    <Version Value="9"/>
+    <PathDelim Value="\"/>
+    <General>
+      <MainUnit Value="0"/>
+      <ResourceType Value="res"/>
+      <UseXPManifest Value="True"/>
+      <Icon Value="0"/>
+    </General>
+    <i18n>
+      <EnableI18N LFM="False"/>
+    </i18n>
+    <VersionInfo>
+      <StringTable ProductVersion=""/>
+    </VersionInfo>
+    <BuildModes Count="1" Active="Default">
+      <Item1 Name="Default" Default="True"/>
+    </BuildModes>
+    <PublishOptions>
+      <Version Value="2"/>
+      <IncludeFileFilter Value="*.(pas|pp|inc|lfm|lpr|lrs|lpi|lpk|sh|xml)"/>
+      <ExcludeFileFilter Value="*.(bak|ppu|o|so);*~;backup"/>
+    </PublishOptions>
+    <RunParams>
+      <local>
+        <FormatVersion Value="1"/>
+      </local>
+    </RunParams>
+    <RequiredPackages Count="1">
+      <Item1>
+        <PackageName Value="LCL"/>
+      </Item1>
+    </RequiredPackages>
+    <Units Count="4">
+      <Unit0>
+        <Filename Value="Demo.lpr"/>
+        <IsPartOfProject Value="True"/>
+        <EditorIndex Value="1"/>
+        <CursorPos X="26" Y="3"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+      </Unit0>
+      <Unit1>
+        <Filename Value="MainFrm.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="MainForm"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Form"/>
+        <UnitName Value="MainFrm"/>
+        <IsVisibleTab Value="True"/>
+        <TopLine Value="32"/>
+        <CursorPos X="52" Y="36"/>
+        <UsageCount Value="20"/>
+        <Loaded Value="True"/>
+        <LoadedDesigner Value="True"/>
+      </Unit1>
+      <Unit2>
+        <Filename Value="MainFrm.lfm"/>
+        <TopLine Value="13"/>
+        <CursorPos X="28" Y="23"/>
+        <UsageCount Value="10"/>
+        <DefaultSyntaxHighlighter Value="LFM"/>
+      </Unit2>
+      <Unit3>
+        <Filename Value="..\Source\BeaEngine.pas"/>
+        <EditorIndex Value="-1"/>
+        <TopLine Value="347"/>
+        <CursorPos X="3" Y="327"/>
+        <UsageCount Value="10"/>
+      </Unit3>
+    </Units>
+    <JumpHistory Count="17" HistoryIndex="16">
+      <Position1>
+        <Filename Value="MainFrm.pas"/>
+        <Caret Line="26"/>
+      </Position1>
+      <Position2>
+        <Filename Value="MainFrm.pas"/>
+        <Caret Line="38" TopLine="10"/>
+      </Position2>
+      <Position3>
+        <Filename Value="MainFrm.pas"/>
+        <Caret Line="16" Column="3"/>
+      </Position3>
+      <Position4>
+        <Filename Value="MainFrm.pas"/>
+        <Caret Line="21" Column="53" TopLine="15"/>
+      </Position4>
+      <Position5>
+        <Filename Value="MainFrm.pas"/>
+        <Caret Line="42" Column="3" TopLine="28"/>
+      </Position5>
+      <Position6>
+        <Filename Value="MainFrm.pas"/>
+        <Caret Line="29" Column="15" TopLine="15"/>
+      </Position6>
+      <Position7>
+        <Filename Value="Demo.lpr"/>
+        <Caret Line="6" Column="33"/>
+      </Position7>
+      <Position8>
+        <Filename Value="Demo.lpr"/>
+        <Caret Line="20"/>
+      </Position8>
+      <Position9>
+        <Filename Value="Demo.lpr"/>
+        <Caret Line="16" Column="19"/>
+      </Position9>
+      <Position10>
+        <Filename Value="Demo.lpr"/>
+        <Caret Line="20"/>
+      </Position10>
+      <Position11>
+        <Filename Value="Demo.lpr"/>
+        <Caret Line="18" Column="29"/>
+      </Position11>
+      <Position12>
+        <Filename Value="Demo.lpr"/>
+        <Caret Line="20"/>
+      </Position12>
+      <Position13>
+        <Filename Value="Demo.lpr"/>
+        <Caret Line="9" Column="48"/>
+      </Position13>
+      <Position14>
+        <Filename Value="Demo.lpr"/>
+        <Caret Line="20"/>
+      </Position14>
+      <Position15>
+        <Filename Value="Demo.lpr"/>
+        <Caret Line="11" Column="3"/>
+      </Position15>
+      <Position16>
+        <Filename Value="MainFrm.pas"/>
+        <Caret Line="42" Column="40" TopLine="28"/>
+      </Position16>
+      <Position17>
+        <Filename Value="MainFrm.pas"/>
+        <Caret Line="43" Column="19" TopLine="33"/>
+      </Position17>
+    </JumpHistory>
+  </ProjectOptions>
+  <CompilerOptions>
+    <Version Value="11"/>
+    <PathDelim Value="\"/>
+    <Target>
+      <Filename Value="..\..\Bin\Demo"/>
+    </Target>
+    <SearchPaths>
+      <IncludeFiles Value="$(ProjOutDir)"/>
+      <Libraries Value="..\..\Source"/>
+      <UnitOutputDirectory Value="..\..\Dcu"/>
+    </SearchPaths>
+    <Linking>
+      <Options>
+        <Win32>
+          <GraphicApplication Value="True"/>
+        </Win32>
+      </Options>
+    </Linking>
+  </CompilerOptions>
+  <Debugging>
+    <Exceptions Count="3">
+      <Item1>
+        <Name Value="EAbort"/>
+      </Item1>
+      <Item2>
+        <Name Value="ECodetoolError"/>
+      </Item2>
+      <Item3>
+        <Name Value="EFOpenError"/>
+      </Item3>
+    </Exceptions>
+  </Debugging>
+</CONFIG>

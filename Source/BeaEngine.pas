@@ -5,7 +5,7 @@
 //  upDate: 2010-Jan-9
 //  v0.4 support Delphi7 - Delphi2010
 //  upDate: 2015-Feb-14
-//  v0.4.1 support Delphi7 - DelphiXE2, x86+x64
+//  v0.4.1 support Delphi7 - DelphiXE2, FPC, x86+x64
 // ====================================================================
 //  BeaEngine.pas convert by Vince
 //	updated by kao
@@ -41,10 +41,6 @@
 unit BeaEngine;
 
 {.$DEFINE USEDLL}
-
-{$IFDEF FPC}
-  {$DEFINE USEDLL}
-{$ENDIF}
 
 interface
 
@@ -328,59 +324,92 @@ function BeaEngineRevision: PAnsiChar; stdcall;
 
 implementation
 
+const
+{$IFDEF CPUX64}
+  BeaEngineLib          = 'BeaEngine64.dll';
+  BeaEngineRevisionName = 'BeaEngineRevision';
+  BeaEngineVersionName  = 'BeaEngineVersion';
+  DisasmName            = 'Disasm';
+  _PU                   = '';
+{$ELSE}
+  BeaEngineLib          = 'BeaEngine.dll';
+  BeaEngineRevisionName = '_BeaEngineRevision@0';
+  BeaEngineVersionName  = '_BeaEngineVersion@0';
+  DisasmName            = '_Disasm@4';
+  _PU                   = '_';
+{$ENDIF}
+
 {$IFDEF USEDLL}
-
-const
-{$IFDEF CPUX64}
-  BeaEngineLib = 'BeaEngine64.dll';
-{$ELSE}
-  BeaEngineLib = 'BeaEngine.dll';
-{$ENDIF}
-
-{$IFDEF CPUX64}
-function Disasm(var aDisAsm: TDISASM): LongInt; stdcall; external BeaEngineLib Name 'Disasm';
-function BeaEngineVersion: PAnsiChar; stdcall; external BeaEngineLib Name 'BeaEngineVersion';
-function BeaEngineRevision: PAnsiChar; stdcall; external BeaEngineLib Name 'BeaEngineRevision';
-{$ELSE}
-function Disasm(var aDisAsm: TDISASM): LongInt; stdcall; external BeaEngineLib Name '_Disasm@4';
-function BeaEngineVersion: PAnsiChar; stdcall; external BeaEngineLib Name '_BeaEngineVersion@0';
-function BeaEngineRevision: PAnsiChar; stdcall; external BeaEngineLib Name '_BeaEngineRevision@0';
-{$ENDIF}
-
+function Disasm(var aDisAsm: TDISASM): LongInt; stdcall; external BeaEngineLib Name DisasmName;
+function BeaEngineVersion: PAnsiChar; stdcall; external BeaEngineLib Name BeaEngineVersionName;
+function BeaEngineRevision: PAnsiChar; stdcall; external BeaEngineLib Name BeaEngineRevisionName;
 {$ELSE}
 
-{$WARN BAD_GLOBAL_SYMBOL OFF}
-
-{$IFDEF CPUX64}
-  {$L 'Win64\BeaEngine.obj'}
+{$IFDEF FPC}
+  {$IFDEF CPUX64}
+    {$L 'Win64\BeaEngine.o'}
+  {$ELSE}
+    {$L 'Win32\BeaEngine.o'}
+  {$ENDIF}
 {$ELSE}
-  {$L 'Win32\BeaEngine.obj'}
+  {$IFDEF CPUX64}
+    {$L 'Win64\BeaEngine.obj'}
+  {$ELSE}
+    {$L 'Win32\BeaEngine.obj'}
+  {$ENDIF}
+  {$WARN BAD_GLOBAL_SYMBOL OFF}
 {$ENDIF}
 
 const
-{$IFDEF MACOS}
-  libc        = '/usr/lib/libc.dylib';
-  _PU         = '_';
+{$IFDEF POSIX}
+  libc                  = '/usr/lib/libc.dylib';
+  _PC                   = _PU;
 {$ELSE}
-  libc        = 'msvcrt.dll';
-  _PU         = '';
+  libc                  = 'msvcrt.dll';
+  _PC                   = '';
 {$ENDIF}
 
 function memset(dest: Pointer; val: Integer; count: PtrUInt): Pointer; cdecl;
-  external libc name _PU + 'memset';
+  external libc name _PC + 'memset';
 function sprintf(buf: Pointer; format: PAnsiChar {args}): Integer; cdecl; varargs;
-  external libc name _PU + 'sprintf';
+  external libc name _PC + 'sprintf';
 function strcmp(s1: PAnsiChar; s2: PAnsiChar): Integer; cdecl;
-  external libc name _PU + 'strcmp';
+  external libc name _PC + 'strcmp';
 function strcpy(dest, src: PAnsiChar): PAnsiChar; cdecl;
-  external libc name _PU + 'strcpy';
+  external libc name _PC + 'strcpy';
 function strlen(s: PAnsiChar): PtrUInt; cdecl;
-  external libc name _PU + 'strlen';
-
-function Disasm(var aDisAsm: TDISASM): LongInt; stdcall; external;
+  external libc name _PC + 'strlen';
+{$IFDEF FPC}
+function _memset(dest: Pointer; val: Integer; count: PtrUInt): Pointer; cdecl; public name _PU + 'memset';
+begin
+  Result := memset(dest, val, count);
+end;
+function _sprintf(buf: Pointer; format: PAnsiChar {args}): Integer; cdecl; {varargs;} public name _PU + 'sprintf';
+begin
+  Result := sprintf(buf, format);
+end;
+function _strcmp(s1: PAnsiChar; s2: PAnsiChar): Integer; cdecl; public name _PU + 'strcmp';
+begin
+  Result := strcmp(s1, s2);
+end;
+function _strcpy(dest, src: PAnsiChar): PAnsiChar; cdecl; public name _PU + 'strcpy';
+begin
+  Result := strcpy(dest, src);
+end;
+function _strlen(s: PAnsiChar): PtrUInt; cdecl; public name _PU + 'strlen';
+begin
+  Result := strlen(s);
+end;
+{$ENDIF}
+{$IFDEF FPC}
+function Disasm(var aDisAsm: TDISASM): LongInt; stdcall; external Name DisasmName;
+function BeaEngineVersion: PAnsiChar; stdcall; external Name BeaEngineVersionName;
+function BeaEngineRevision: PAnsiChar; stdcall; external Name BeaEngineRevisionName;
+{$ELSE}
+function Disasm(var aDisAsm: TDISASM): LongInt; stdcall; external; { Delphi 2007- not support external FuncName }
 function BeaEngineVersion: PAnsiChar; stdcall; external;
 function BeaEngineRevision: PAnsiChar; stdcall; external;
 {$ENDIF}
+{$ENDIF}
 
 end.
-

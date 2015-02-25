@@ -4,9 +4,6 @@
     <Version Value="9"/>
     <PathDelim Value="\"/>
     <General>
-      <Flags>
-        <UseDefaultCompilerOptions Value="True"/>
-      </Flags>
       <SessionStorage Value="InProjectDir"/>
       <MainUnit Value="0"/>
       <Title Value="Demo"/>
@@ -52,6 +49,7 @@
     <SearchPaths>
       <IncludeFiles Value="$(ProjOutDir)"/>
       <Libraries Value="..\..\Source"/>
+      <OtherUnitFiles Value="..\..\Source"/>
       <UnitOutputDirectory Value="..\..\Dcu"/>
     </SearchPaths>
     <Linking>

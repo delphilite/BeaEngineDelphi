@@ -12,7 +12,6 @@ object MainForm: TMainForm
   Font.Name = 'Tahoma'
   OnCreate = FormCreate
   Position = poScreenCenter
-  LCLVersion = '0.9.30.4'
   object Memo1: TMemo
     Left = 0
     Height = 322

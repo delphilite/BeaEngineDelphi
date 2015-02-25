@@ -324,33 +324,64 @@ function BeaEngineRevision: PAnsiChar; stdcall;
 
 implementation
 
+{$IFDEF CPU64}
+  {$DEFINE CPUX64}
+{$ENDIF}
+
 const
 {$IFDEF CPUX64}
-  BeaEngineLib          = 'BeaEngine64.dll';
   BeaEngineRevisionName = 'BeaEngineRevision';
   BeaEngineVersionName  = 'BeaEngineVersion';
   DisasmName            = 'Disasm';
   _PU                   = '';
+{$ELSE} {$IFDEF LINUX}
+  BeaEngineRevisionName = 'BEAENGINE_$$_BEAENGINEREVISION$$PCHAR';
+  BeaEngineVersionName  = 'BEAENGINE_$$_BEAENGINEVERSION$$PCHAR';
+  DisasmName            = 'BEAENGINE_$$_DISASM$TDISASM$$LONGINT';
+  _PU                   = '_';
 {$ELSE}
-  BeaEngineLib          = 'BeaEngine.dll';
   BeaEngineRevisionName = '_BeaEngineRevision@0';
   BeaEngineVersionName  = '_BeaEngineVersion@0';
   DisasmName            = '_Disasm@4';
   _PU                   = '_';
-{$ENDIF}
+{$ENDIF} {$ENDIF}
 
 {$IFDEF USEDLL}
+
+{$IFDEF MSWINDOWS} {$IFDEF CPUX64}
+  BeaEngineLib          = 'BeaEngine64.dll';
+{$ELSE}
+  BeaEngineLib          = 'BeaEngine.dll';
+{$ENDIF} {$ENDIF}
+{$IFDEF MACOS}
+  BeaEngineLib          = 'libBeaEngine.so';
+{$ELSE}
+{$IFDEF LINUX}
+  BeaEngineLib          = 'libBeaEngine.so';
+{$ELSE}
+
 function Disasm(var aDisAsm: TDISASM): LongInt; stdcall; external BeaEngineLib Name DisasmName;
 function BeaEngineVersion: PAnsiChar; stdcall; external BeaEngineLib Name BeaEngineVersionName;
 function BeaEngineRevision: PAnsiChar; stdcall; external BeaEngineLib Name BeaEngineRevisionName;
+
 {$ELSE}
 
 {$IFDEF FPC}
-  {$IFDEF CPUX64}
+  {$IFDEF MSWINDOWS} {$IFDEF CPUX64}
     {$L 'Win64\BeaEngine.o'}
   {$ELSE}
     {$L 'Win32\BeaEngine.o'}
-  {$ENDIF}
+  {$ENDIF} {$ENDIF}
+  {$IFDEF MACOS} {$IFDEF CPUX64}
+    {$L 'OSX64\BeaEngine.o'}
+  {$ELSE}
+    {$L 'OSX32\BeaEngine.o'}
+  {$ENDIF} {$ENDIF}
+  {$IFDEF LINUX} {$IFDEF CPUX64}
+    {$L 'Linux64\BeaEngine.o'}
+  {$ELSE}
+    {$L 'Linux32\BeaEngine.o'}
+  {$ENDIF} {$ENDIF}
 {$ELSE}
   {$IFDEF CPUX64}
     {$L 'Win64\BeaEngine.obj'}
@@ -361,12 +392,17 @@ function BeaEngineRevision: PAnsiChar; stdcall; external BeaEngineLib Name BeaEn
 {$ENDIF}
 
 const
-{$IFDEF POSIX}
-  libc                  = '/usr/lib/libc.dylib';
-  _PC                   = _PU;
-{$ELSE}
+{$IFDEF MSWINDOWS}
   libc                  = 'msvcrt.dll';
   _PC                   = '';
+{$ENDIF}
+{$IFDEF MACOS}
+  libc                  = '/usr/lib/libc.dylib';
+  _PC                   = _PU;
+{$ENDIF}
+{$IFDEF LINUX}
+  libc                  = 'c';
+  _PC                   = _PU;
 {$ENDIF}
 
 function memset(dest: Pointer; val: Integer; count: PtrUInt): Pointer; cdecl;
@@ -379,6 +415,7 @@ function strcpy(dest, src: PAnsiChar): PAnsiChar; cdecl;
   external libc name _PC + 'strcpy';
 function strlen(s: PAnsiChar): PtrUInt; cdecl;
   external libc name _PC + 'strlen';
+
 {$IFDEF FPC}
 function _memset(dest: Pointer; val: Integer; count: PtrUInt): Pointer; cdecl; public name _PU + 'memset';
 begin
@@ -401,15 +438,17 @@ begin
   Result := strlen(s);
 end;
 {$ENDIF}
+
 {$IFDEF FPC}
 function Disasm(var aDisAsm: TDISASM): LongInt; stdcall; external Name DisasmName;
 function BeaEngineVersion: PAnsiChar; stdcall; external Name BeaEngineVersionName;
 function BeaEngineRevision: PAnsiChar; stdcall; external Name BeaEngineRevisionName;
 {$ELSE}
-function Disasm(var aDisAsm: TDISASM): LongInt; stdcall; external; { Delphi 2007- not support external FuncName }
+function Disasm(var aDisAsm: TDISASM): LongInt; stdcall; external; { Delphi/BCB }
 function BeaEngineVersion: PAnsiChar; stdcall; external;
 function BeaEngineRevision: PAnsiChar; stdcall; external;
 {$ENDIF}
+
 {$ENDIF}
 
 end.

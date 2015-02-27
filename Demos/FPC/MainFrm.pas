@@ -40,7 +40,7 @@ begin
   // ======== Init the TDisasm structure (important !)
   FillChar(MyDisasm, SizeOf(TDISASM), 0);
   // ======== Init EIP
-  MyDisasm.EIP := PtrUInt(@SysUtils.StrComp);
+  MyDisasm.EIP := size_t(@SysUtils.StrComp);
 {$IFDEF CPUX64}
   MyDisasm.Archi := 64;
 {$ELSE}

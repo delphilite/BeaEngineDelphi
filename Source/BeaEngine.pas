@@ -40,6 +40,10 @@
 
 unit BeaEngine;
 
+{$IFDEF CPU64}
+  {$DEFINE CPUX64}
+{$ENDIF}
+
 {.$DEFINE USEDLL}
 
 interface
@@ -48,11 +52,13 @@ const
   INSTRUCT_LENGTH       = 64;
 
 type
-{$IFNDEF FPC}{$IF CompilerVersion < 23}
-  PtrUInt = LongWord;
+{$IFDEF FPC}
+  size_t = PtrUInt;
+{$ELSE} {$IFDEF CPUX64}
+  size_t = NativeUInt;
 {$ELSE}
-  PtrUInt = NativeUInt;
-{$IFEND}{$ENDIF}
+  size_t = LongWord;
+{$ENDIF} {$ENDIF}
 
   TREX_Struct = packed record
     W_: Byte;
@@ -126,7 +132,7 @@ type
   end;
 
   TDISASM = packed record
-    EIP: PtrUInt;
+    EIP: size_t;
     VirtualAddr: Int64;
     SecurityBlock: LongInt;
     CompleteInstr: array[0..(INSTRUCT_LENGTH) - 1] of AnsiChar;
@@ -324,10 +330,6 @@ function BeaEngineRevision: PAnsiChar; stdcall;
 
 implementation
 
-{$IFDEF CPU64}
-  {$DEFINE CPUX64}
-{$ENDIF}
-
 const
 {$IFDEF CPUX64}
   BeaEngineRevisionName = 'BeaEngineRevision';
@@ -355,10 +357,10 @@ const
 {$ENDIF} {$ENDIF}
 {$IFDEF MACOS}
   BeaEngineLib          = 'libBeaEngine.so';
-{$ELSE}
+{$ENDIF}
 {$IFDEF LINUX}
   BeaEngineLib          = 'libBeaEngine.so';
-{$ELSE}
+{$ENDIF}
 
 function Disasm(var aDisAsm: TDISASM): LongInt; stdcall; external BeaEngineLib Name DisasmName;
 function BeaEngineVersion: PAnsiChar; stdcall; external BeaEngineLib Name BeaEngineVersionName;
@@ -405,7 +407,7 @@ const
   _PC                   = _PU;
 {$ENDIF}
 
-function memset(dest: Pointer; val: Integer; count: PtrUInt): Pointer; cdecl;
+function memset(dest: Pointer; val: Integer; count: size_t): Pointer; cdecl;
   external libc name _PC + 'memset';
 function sprintf(buf: Pointer; format: PAnsiChar {args}): Integer; cdecl; varargs;
   external libc name _PC + 'sprintf';
@@ -413,11 +415,11 @@ function strcmp(s1: PAnsiChar; s2: PAnsiChar): Integer; cdecl;
   external libc name _PC + 'strcmp';
 function strcpy(dest, src: PAnsiChar): PAnsiChar; cdecl;
   external libc name _PC + 'strcpy';
-function strlen(s: PAnsiChar): PtrUInt; cdecl;
+function strlen(s: PAnsiChar): size_t; cdecl;
   external libc name _PC + 'strlen';
 
 {$IFDEF FPC}
-function _memset(dest: Pointer; val: Integer; count: PtrUInt): Pointer; cdecl; public name _PU + 'memset';
+function _memset(dest: Pointer; val: Integer; count: size_t): Pointer; cdecl; public name _PU + 'memset';
 begin
   Result := memset(dest, val, count);
 end;
@@ -433,7 +435,7 @@ function _strcpy(dest, src: PAnsiChar): PAnsiChar; cdecl; public name _PU + 'str
 begin
   Result := strcpy(dest, src);
 end;
-function _strlen(s: PAnsiChar): PtrUInt; cdecl; public name _PU + 'strlen';
+function _strlen(s: PAnsiChar): size_t; cdecl; public name _PU + 'strlen';
 begin
   Result := strlen(s);
 end;

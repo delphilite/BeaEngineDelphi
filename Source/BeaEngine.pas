@@ -38,6 +38,14 @@
 //
 // ====================================================================
 
+{$ALIGN ON}
+{$MINENUMSIZE 4}
+{$WEAKPACKAGEUNIT}
+
+{$IFDEF FPC}
+  {$MODE Delphi}
+{$ENDIF}
+
 unit BeaEngine;
 
 {$IFDEF CPU64}

@@ -1,199 +1,330 @@
-// ====================================================================
-//
-//  Delphi Static lib for BeaEngine 4.x
-//
-//  upDate: 2010-Jan-9
-//  v0.4 support Delphi7 - Delphi2010
-//  upDate: 2015-Feb-14
-//  v0.4.1 support Delphi7 - DelphiXE2, FPC, x86+x64
-// ====================================================================
-//  BeaEngine.pas convert by Vince
-//	updated by kao
-//	updated 0.4.1 by lsuper
-// ====================================================================
-// [+] BranchTaken,BranchNotTaken added in TPREFIXINFO v3.1.0
-// ====================================================================
-// Default link type is static lib
-// comment below line to switch link with DLL
-// ====================================================================
-// {$DEFINE USEDLL}
-// ====================================================================
-// Copyright 2006-2009, BeatriX
-// File coded by BeatriX
-//
-// This file is part of BeaEngine.
-//
-//    BeaEngine is free software: you can redistribute it and/or modify
-//    it under the terms of the GNU Lesser General Public License as published by
-//    the Free Software Foundation, either version 3 of the License, or
-//    (at your option) any later version.
-//
-//    BeaEngine is distributed in the hope that it will be useful,
-//    but WITHOUT ANY WARRANTY; without even the implied warranty of
-//    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//    GNU Lesser General Public License for more details.
-//
-//    You should have received a copy of the GNU Lesser General Public License
-//    along with BeaEngine.  If not, see <http://www.gnu.org/licenses/>.
-//
-// ====================================================================
+{ ***************************************************** }
+{                                                       }
+{  Pascal language binding for the BeaEngine            }
+{                                                       }
+{  Unit Name: BeaEngine Api Header                      }
+{     Author: Lsuper 2024.06.01                         }
+{    Purpose:                                           }
+{                                                       }
+{  Copyright (c) 1998-2024 Super Studio                 }
+{                                                       }
+{ ***************************************************** }
+
+{$IFDEF FPC}
+  {$MODE DELPHI}
+  {$WARNINGS OFF}
+  {$HINTS OFF}
+{$ENDIF}
 
 {$ALIGN ON}
 {$MINENUMSIZE 4}
 {$WEAKPACKAGEUNIT}
 
-{$IFDEF FPC}
-  {$MODE Delphi}
-{$ENDIF}
-
 unit BeaEngine;
 
-{$IFDEF CPU64}
-  {$DEFINE CPUX64}
-{$ENDIF}
+{.$DEFINE BE_STATICLINK}
 
-{.$DEFINE USEDLL}
+{$IFDEF BE_STATICLINK}
+  {$IFDEF FPC}
+    {$MESSAGE ERROR 'staticlink not supported'}
+  {$ENDIF}
+  {$IFNDEF MSWINDOWS}
+    {$MESSAGE ERROR 'staticlink not supported'}
+  {$ENDIF}
+  {$IFNDEF CPUX64}
+    {$DEFINE BE_USE_UNDERSCORE}
+  {$ENDIF}
+{$ELSE}
+  {$DEFINE BE_USE_EXTNAME}
+{$ENDIF}
 
 interface
 
 const
-  INSTRUCT_LENGTH       = 64;
+  INSTRUCT_LENGTH = 80;
 
 type
-{$IFDEF FPC}
-  size_t = PtrUInt;
-{$ELSE} {$IFDEF CPUX64}
-  size_t = NativeUInt;
-{$ELSE}
-  size_t = LongWord;
-{$ENDIF} {$ENDIF}
-
-  TREX_Struct = packed record
-    W_: Byte;
-    R_: Byte;
-    X_: Byte;
-    B_: Byte;
-    state: Byte;
+  EVEX_Struct = packed record
+    P0: UInt8;
+    P1: UInt8;
+    P2: UInt8;
+    mm: UInt8;
+    pp: UInt8;
+    R: UInt8;
+    X: UInt8;
+    B: UInt8;
+    R1: UInt8;
+    vvvv: UInt8;
+    V: UInt8;
+    aaa: UInt8;
+    W: UInt8;
+    z: UInt8;
+    b_: UInt8;
+    LL: UInt8;
+    state: UInt8;
+    masking: UInt8;
+    tupletype: UInt8;
   end;
 
-  TPREFIXINFO = packed record
-    Number: LongInt;
-    NbUndefined: LongInt;
-    LockPrefix: Byte;
-    OperandSize: Byte;
-    AddressSize: Byte;
-    RepnePrefix: Byte;
-    RepPrefix: Byte;
-    FSPrefix: Byte;
-    SSPrefix: Byte;
-    GSPrefix: Byte;
-    ESPrefix: Byte;
-    CSPrefix: Byte;
-    DSPrefix: Byte;
-    BranchTaken: Byte;    //v3.1.0 added 2009-11-05
-    BranchNotTaken: Byte; //v3.1.0 added 2009-11-05
-    REX: TREX_Struct;
-    Alignment: array[0..1] of AnsiChar; //v4.1 rev 175 added 2015-02-14
+  VEX_Struct = packed record
+    L: UInt8;
+    vvvv: UInt8;
+    mmmmm: UInt8;
+    pp: UInt8;
+    state: UInt8;
+    opcode: UInt8;
   end;
 
-  TEFLStruct = packed record
-    OF_: Byte;
-    SF_: Byte;
-    ZF_: Byte;
-    AF_: Byte;
-    PF_: Byte;
-    CF_: Byte;
-    TF_: Byte;
-    IF_: Byte;
-    DF_: Byte;
-    NT_: Byte;
-    RF_: Byte;
-    alignment: Byte;
+  REX_Struct = packed record
+    W_: UInt8;
+    R_: UInt8;
+    X_: UInt8;
+    B_: UInt8;
+    state: UInt8;
   end;
 
-  TMEMORYTYPE = packed record
-    BaseRegister: LongInt;
-    IndexRegister: LongInt;
-    Scale: LongInt;
+  PREFIXINFO = packed record
+    Number: Integer;
+    NbUndefined: Integer;
+    LockPrefix: UInt8;
+    OperandSize: UInt8;
+    AddressSize: UInt8;
+    RepnePrefix: UInt8;
+    RepPrefix: UInt8;
+    FSPrefix: UInt8;
+    SSPrefix: UInt8;
+    GSPrefix: UInt8;
+    ESPrefix: UInt8;
+    CSPrefix: UInt8;
+    DSPrefix: UInt8;
+    BranchTaken: UInt8;
+    BranchNotTaken: UInt8;
+    REX: REX_Struct;
+    alignment: array [0..1] of AnsiChar;
+  end;
+
+  EFLStruct = packed record
+    OF_: UInt8;
+    SF_: UInt8;
+    ZF_: UInt8;
+    AF_: UInt8;
+    PF_: UInt8;
+    CF_: UInt8;
+    TF_: UInt8;
+    IF_: UInt8;
+    DF_: UInt8;
+    NT_: UInt8;
+    RF_: UInt8;
+    alignment: UInt8;
+  end;
+
+  MEMORYTYPE = packed record
+    BaseRegister: Int64;
+    IndexRegister: Int64;
+    Scale: Int32;
     Displacement: Int64;
   end;
 
-  TINSTRTYPE = packed record
-    Category: LongInt;
-    Opcode: LongInt;
-    Mnemonic: array[0..15] of AnsiChar;
-    BranchType: LongInt;
-    Flags: TEFLStruct;
-    AddrValue: Int64;
+  REGISTERTYPE = packed record
+    type_: Int64;
+    gpr: Int64;
+    mmx: Int64;
+    xmm: Int64;
+    ymm: Int64;
+    zmm: Int64;
+    special: Int64;
+    cr: Int64;
+    dr: Int64;
+    mem_management: Int64;
+    mpx: Int64;
+    opmask: Int64;
+    segment: Int64;
+    fpu: Int64;
+    tmm: Int64;
+  end;
+
+  INSTRTYPE = packed record
+    Category: Int32;
+    Opcode: Int32;
+    Mnemonic: array [0..23] of AnsiChar;
+    BranchType: Int32;
+    Flags: EFLStruct;
+    AddrValue: UInt64;
     Immediat: Int64;
-    ImplicitModifiedRegs: LongInt;
+    ImplicitModifiedRegs: REGISTERTYPE;
+    ImplicitUsedRegs: REGISTERTYPE;
   end;
 
-  TARGTYPE = packed record
-    ArgMnemonic: array[0..63] of AnsiChar;  //v4.1 rev 175 modify 2015-02-14
-    ArgType: LongInt;
-    ArgSize: LongInt;
-    ArgPosition: LongInt;
-    AccessMode: LongInt;
-    Memory: TMEMORYTYPE;
-    SegmentReg: LongInt;
+  OPTYPE = packed record
+    OpMnemonic: array [0..23] of AnsiChar;
+    OpType: Int64;
+    OpSize: Int32;
+    OpPosition: Int32;
+    AccessMode: UInt32;
+    Memory: MEMORYTYPE;
+    Registers: REGISTERTYPE;
+    SegmentReg: UInt32;
   end;
 
-  TDISASM = packed record
-    EIP: size_t;
-    VirtualAddr: Int64;
-    SecurityBlock: LongInt;
-    CompleteInstr: array[0..(INSTRUCT_LENGTH) - 1] of AnsiChar;
-    Archi: LongInt;
-    Options: Int64;
-    Instruction: TINSTRTYPE;
-    Argument1: TARGTYPE;
-    Argument2: TARGTYPE;
-    Argument3: TARGTYPE;
-    Prefix: TPREFIXINFO;
-    Reserved_: array[0..39] of LongInt;
+  //* reserved structure used for thread-safety */
+  //* unusable by customer */
+
+  InternalDatas = packed record
+    EIP_: UIntPtr;
+    EIP_VA: UInt64;
+    EIP_REAL: UIntPtr;
+    OriginalOperandSize: Int32;
+    OperandSize: Int32;
+    MemDecoration: Int32;
+    AddressSize: Int32;
+    MOD_: Int32;
+    RM_: Int32;
+    INDEX_: Int32;
+    SCALE_: Int32;
+    BASE_: Int32;
+    REGOPCODE: Int32;
+    DECALAGE_EIP: UInt32;
+    FORMATNUMBER: Int32;
+    SYNTAX_: Int32;
+    EndOfBlock: UInt64;
+    RelativeAddress: Int32;
+    Architecture: UInt32;
+    ImmediatSize: Int32;
+    NB_PREFIX: Int32;
+    PrefRepe: Int32;
+    PrefRepne: Int32;
+    SEGMENTREGS: UInt32;
+    SEGMENTFS: UInt32;
+    third_arg: Int32;
+    OPTIONS: UInt64;
+    ERROR_OPCODE: Int32;
+    REX: REX_Struct;
+    OutOfBlock: Int32;
+    VEX: VEX_Struct;
+    EVEX: EVEX_Struct;
+    VSIB_: Int32;
+    Register_: Int32;
   end;
-  PDISASM = ^TDISASM;
-  LPDISASM = ^TDISASM;
+
+  //* ************** main structure ************ */
+
+  _Disasm = packed record
+    EIP: UIntPtr;
+    VirtualAddr: UInt64;
+    SecurityBlock: UInt32;
+    CompleteInstr: array [0..79] of AnsiChar;
+    Archi: UInt32;
+    Options: UInt64;
+    Instruction: INSTRTYPE;
+    Operand1: OPTYPE;
+    Operand2: OPTYPE;
+    Operand3: OPTYPE;
+    Operand4: OPTYPE;
+    Operand5: OPTYPE;
+    Operand6: OPTYPE;
+    Operand7: OPTYPE;
+    Operand8: OPTYPE;
+    Operand9: OPTYPE;
+    Prefix: PREFIXINFO;
+    Error: Int32;
+    Reserved_: InternalDatas;
+  end;
+  TDisasm = _Disasm;
+  PDisasm = ^TDisasm;
 
 const
-  ESReg                 = 1;
-  DSReg                 = 2;
-  FSReg                 = 3;
-  GSReg                 = 4;
-  CSReg                 = 5;
-  SSReg                 = 6;
+  //* #UD exception */
+  UD_                   = 2;
+  DE__                  = 3;
+
+const
+  ESReg                 = $01;
+  DSReg                 = $02;
+  FSReg                 = $04;
+  GSReg                 = $08;
+  CSReg                 = $10;
+  SSReg                 = $20;
+
+const
   InvalidPrefix         = 4;
   SuperfluousPrefix     = 2;
   NotUsedPrefix         = 0;
   MandatoryPrefix       = 8;
   InUsePrefix           = 1;
 
+  LowPosition           = 0;
+  HighPosition          = 1;
+
+  //* EVEX Masking */
+
+  NO_MASK               = 0;
+  MERGING               = 1;
+  MERGING_ZEROING       = 2;
+
+  //* EVEX Compressed Displacement */
+
+  FULL                  = 1;
+  HALF                  = 2;
+  FULL_MEM              = 3;
+  TUPLE1_SCALAR__8      = 4;
+  TUPLE1_SCALAR__16     = 5;
+  TUPLE1_SCALAR         = 6;
+  TUPLE1_FIXED__32      = 7;
+  TUPLE1_FIXED__64      = 8;
+  TUPLE2                = 9;
+  TUPLE4                = 10;
+  TUPLE8                = 11;
+  HALF_MEM              = 12;
+  QUARTER_MEM           = 13;
+  EIGHTH_MEM            = 14;
+  MEM128                = 15;
+  MOVDDUP               = 16;
+
 type
-  INSTRUCTION_TYPE = LongInt;
+  INSTRUCTION_TYPE = Integer;
 const
   GENERAL_PURPOSE_INSTRUCTION = $10000;
   FPU_INSTRUCTION       = $20000;
-  MMX_INSTRUCTION       = $40000;
-  SSE_INSTRUCTION       = $80000;
-  SSE2_INSTRUCTION      = $100000;
-  SSE3_INSTRUCTION      = $200000;
-  SSSE3_INSTRUCTION     = $400000;
-  SSE41_INSTRUCTION     = $800000;
-  SSE42_INSTRUCTION     = $1000000;
-  SYSTEM_INSTRUCTION    = $2000000;
-  VM_INSTRUCTION        = $4000000;
-  UNDOCUMENTED_INSTRUCTION = $8000000;
-  AMD_INSTRUCTION       = $10000000;
-  ILLEGAL_INSTRUCTION   = $20000000;
-  AES_INSTRUCTION       = $40000000;
-  CLMUL_INSTRUCTION     = $80000000;
+  MMX_INSTRUCTION       = $30000;
+  SSE_INSTRUCTION       = $40000;
+  SSE2_INSTRUCTION      = $50000;
+  SSE3_INSTRUCTION      = $60000;
+  SSSE3_INSTRUCTION     = $70000;
+  SSE41_INSTRUCTION     = $80000;
+  SSE42_INSTRUCTION     = $90000;
+  SYSTEM_INSTRUCTION    = $A0000;
+  VM_INSTRUCTION        = $B0000;
+  UNDOCUMENTED_INSTRUCTION = $C0000;
+  AMD_INSTRUCTION       = $D0000;
+  ILLEGAL_INSTRUCTION   = $E0000;
+  AES_INSTRUCTION       = $F0000;
+  CLMUL_INSTRUCTION     = $100000;
+  AVX_INSTRUCTION       = $110000;
+  AVX2_INSTRUCTION      = $120000;
+  MPX_INSTRUCTION       = $130000;
+  AVX512_INSTRUCTION    = $140000;
+  SHA_INSTRUCTION       = $150000;
+  BMI2_INSTRUCTION      = $160000;
+  CET_INSTRUCTION       = $170000;
+  BMI1_INSTRUCTION      = $180000;
+  XSAVEOPT_INSTRUCTION  = $190000;
+  FSGSBASE_INSTRUCTION  = $1A0000;
+  CLWB_INSTRUCTION      = $1B0000;
+  CLFLUSHOPT_INSTRUCTION = $1C0000;
+  FXSR_INSTRUCTION      = $1D0000;
+  XSAVE_INSTRUCTION     = $1E0000;
+  SGX_INSTRUCTION       = $1F0000;
+  PCONFIG_INSTRUCTION   = $200000;
+  UINTR_INSTRUCTION     = $210000;
+  KL_INSTRUCTION        = $220000;
+  AMX_INSTRUCTION       = $230000;
 
-  DATA_TRANSFER         = $1;
+const
+  DATA_TRANSFER         = 1;
   ARITHMETIC_INSTRUCTION = 2;
   LOGICAL_INSTRUCTION   = 3;
   SHIFT_ROTATE          = 4;
-  BIT_BYTE              = 5;
+  BIT_UInt8             = 5;
   CONTROL_TRANSFER      = 6;
   STRING_INSTRUCTION    = 7;
   InOutINSTRUCTION      = 8;
@@ -230,21 +361,21 @@ const
   INSERTION_EXTRACTION  = 39;
   DOT_PRODUCT           = 40;
   SAD_INSTRUCTION       = 41;
-  ACCELERATOR_INSTRUCTION = 42; //   crc32, popcnt (sse4.2)
+  ACCELERATOR_INSTRUCTION = 42; //* crc32; popcnt (sse4.2) */
   ROUND_INSTRUCTION     = 43;
 
 type
-  EFLAGS_STATES = LongInt;
+  EFLAGS_STATES = Integer;
 const
-  TE_                   = 1;
-  MO_                   = 2;
-  RE_                   = 4;
-  SE_                   = 8;
+  TE_                   = $01;
+  MO_                   = $02;
+  RE_                   = $04;
+  SE_                   = $08;
   UN_                   = $10;
   PR_                   = $20;
 
 type
-  BRANCH_TYPE = LongInt;
+  BRANCH_TYPE = Integer;
 const
   JO                    = 1;
   JC                    = 2;
@@ -254,44 +385,49 @@ const
   JP                    = 6;
   JL                    = 7;
   JG                    = 8;
-  JB                    = 2;
+  JB                    = 2;   //* JC == JB */
   JECXZ                 = 10;
   JmpType               = 11;
   CallType              = 12;
   RetType               = 13;
-  JNO                   = -(1);
-  JNC                   = -(2);
-  JNE                   = -(3);
-  JNA                   = -(4);
-  JNS                   = -(5);
-  JNP                   = -(6);
-  JNL                   = -(7);
-  JNG                   = -(8);
-  JNB                   = -(2);
+  JNO                   = -1;
+  JNC                   = -2;
+  JNE                   = -3;
+  JNA                   = -4;
+  JNS                   = -5;
+  JNP                   = -6;
+  JNL                   = -7;
+  JNG                   = -8;
+  JNB                   = -2;  //* JNC == JNB */
 
 type
-  ARGUMENTS_TYPE = LongInt;
+  ARGUMENTS_TYPE = Integer;
 const
-  NO_ARGUMENT           = $10000000;
-  REGISTER_TYPE         = $20000000;
-  MEMORY_TYPE           = $40000000;
-  CONSTANT_TYPE         = $80000000;
+  NO_ARGUMENT           = $10000;
+  REGISTER_TYPE         = $20000;
+  MEMORY_TYPE           = $30000;
+  CONSTANT_TYPE         = $40000;
 
-  MMX_REG               = $10000;
-  GENERAL_REG           = $20000;
-  FPU_REG               = $40000;
-  SSE_REG               = $80000;
-  CR_REG                = $100000;
-  DR_REG                = $200000;
-  SPECIAL_REG           = $400000;
-  MEMORY_MANAGEMENT_REG = $800000;
-  SEGMENT_REG           = $1000000;
+  GENERAL_REG           = $1;
+  MMX_REG               = $2;
+  SSE_REG               = $4;
+  AVX_REG               = $8;
+  AVX512_REG            = $10;
+  SPECIAL_REG           = $20;
+  CR_REG                = $40;
+  DR_REG                = $80;
+  MEMORY_MANAGEMENT_REG = $100;
+  MPX_REG               = $200;
+  OPMASK_REG            = $400;
+  SEGMENT_REG           = $800;
+  FPU_REG               = $1000;
+  TMM_REG               = $2000;
 
   RELATIVE_             = $4000000;
   ABSOLUTE_             = $8000000;
 
-  Read                  = $1;
-  Write                 = $2;
+  READ                  = $1;
+  WRITE                 = $2;
 
   REG0                  = $1;
   REG1                  = $2;
@@ -309,72 +445,105 @@ const
   REG13                 = $2000;
   REG14                 = $4000;
   REG15                 = $8000;
+  REG16                 = $10000;
+  REG17                 = $20000;
+  REG18                 = $40000;
+  REG19                 = $80000;
+  REG20                 = $100000;
+  REG21                 = $200000;
+  REG22                 = $400000;
+  REG23                 = $800000;
+  REG24                 = $1000000;
+  REG25                 = $2000000;
+  REG26                 = $4000000;
+  REG27                 = $8000000;
+  REG28                 = $10000000;
+  REG29                 = $20000000;
+  REG30                 = $40000000;
+  REG31                 = $80000000;
 
 type
-  SPECIAL_INFO = LongInt;
+  SPECIAL_INFO = Integer;
 const
-  UNKNOWN_OPCODE        = -(1);
-  OUT_OF_BLOCK          = 0;
-  { === mask = 0xff }
+  UNKNOWN_OPCODE        = -1;
+  OUT_OF_BLOCK          = -2;
+
+  //* === mask = 0xff */
   NoTabulation          = $00000000;
   Tabulation            = $00000001;
-  { === mask = 0xff00 }
+
+  //* === mask = 0xff00 */
   MasmSyntax            = $00000000;
   GoAsmSyntax           = $00000100;
   NasmSyntax            = $00000200;
   ATSyntax              = $00000400;
-  { === mask = 0xff0000 }
+  IntrinsicMemSyntax    = $00000800;
+
+  //* === mask = 0xff0000 */
   PrefixedNumeral       = $00010000;
   SuffixedNumeral       = $00000000;
-  { === mask = 0xff000000 }
+
+  //* === mask = 0xff000000 */
   ShowSegmentRegs       = $01000000;
-  LowPosition           = 0;
-  HighPosition          = 1;
+  ShowEVEXMasking       = $02000000;
 
-function Disasm(var aDisAsm: TDISASM): LongInt; stdcall;
-
-function BeaEngineVersion: PAnsiChar; stdcall;
-function BeaEngineRevision: PAnsiChar; stdcall;
-
-implementation
+const
+{$IFDEF MSWINDOWS}
+  // win32 from beaengine-src-5.3.0.zip\build\obj\Windows.msvc.Debug\src\BeaEngine_d_l_stdcall.vcxproj + BUILD_BEA_ENGINE_DLL;BEA_LACKS_SNPRINTF;BEA_USE_STDCALL
+  // win64 from beaengine-bin-5.3.0.zip\dll_x64\BeaEngine.dll
+  BeaEngineLib   = 'BeaEngine.dll';
+{$ENDIF}
+{$IFDEF LINUX}
+  BeaEngineLib   = 'libBeaEngine.so';
+{$ENDIF}
+{$IFDEF MACOS}
+  {$IF DEFINED(IOS) or DEFINED(MACOS64)}
+    BeaEngineLib = '/usr/lib/libBeaEngine.dylib';
+  {$ELSE}
+    BeaEngineLib = 'libBeaEngine.dylib';
+  {$IFEND}
+{$ENDIF}
+{$IF DEFINED(FPC) and DEFINED(DARWIN)}
+  BeaEngineLib   = 'libBeaEngine.dylib';
+  {$LINKLIB libBeaEngine}
+{$IFEND}
+{$IFDEF ANDROID}
+  BeaEngineLib   = 'libBeaEngine.so';
+{$ENDIF ANDROID}
 
 const
 {$IFDEF CPUX64}
   BeaEngineRevisionName = 'BeaEngineRevision';
   BeaEngineVersionName  = 'BeaEngineVersion';
   DisasmName            = 'Disasm';
-  _PU                   = '';
 {$ELSE} {$IFDEF LINUX}
   BeaEngineRevisionName = 'BEAENGINE_$$_BEAENGINEREVISION$$PCHAR';
   BeaEngineVersionName  = 'BEAENGINE_$$_BEAENGINEVERSION$$PCHAR';
   DisasmName            = 'BEAENGINE_$$_DISASM$TDISASM$$LONGINT';
-  _PU                   = '_';
 {$ELSE}
   BeaEngineRevisionName = '_BeaEngineRevision@0';
   BeaEngineVersionName  = '_BeaEngineVersion@0';
   DisasmName            = '_Disasm@4';
-  _PU                   = '_';
 {$ENDIF} {$ENDIF}
 
-{$IFDEF USEDLL}
+// The Disasm function disassembles one instruction from the Intel ISA.
+// It makes a precise analysis of the focused instruction and sends back a complete structure that is usable to make data-flow and control-flow studies.
+function Disasm(var aDisAsm: TDisasm): LongInt; stdcall;
+  external {$IFDEF BE_USE_EXTNAME}BeaEngineLib{$ENDIF} name DisasmName;
 
-{$IFDEF MSWINDOWS} {$IFDEF CPUX64}
-  BeaEngineLib          = 'BeaEngine64.dll';
-{$ELSE}
-  BeaEngineLib          = 'BeaEngine.dll';
-{$ENDIF} {$ENDIF}
-{$IFDEF MACOS}
-  BeaEngineLib          = 'libBeaEngine.so';
-{$ENDIF}
-{$IFDEF LINUX}
-  BeaEngineLib          = 'libBeaEngine.so';
-{$ENDIF}
+function BeaEngineVersion: PAnsiChar; stdcall;
+  external {$IFDEF BE_USE_EXTNAME}BeaEngineLib{$ENDIF} name BeaEngineVersionName;
 
-function Disasm(var aDisAsm: TDISASM): LongInt; stdcall; external BeaEngineLib Name DisasmName;
-function BeaEngineVersion: PAnsiChar; stdcall; external BeaEngineLib Name BeaEngineVersionName;
-function BeaEngineRevision: PAnsiChar; stdcall; external BeaEngineLib Name BeaEngineRevisionName;
+function BeaEngineRevision: PAnsiChar; stdcall;
+  external {$IFDEF BE_USE_EXTNAME}BeaEngineLib{$ENDIF} name BeaEngineRevisionName;
 
-{$ELSE}
+function BeaEngineVersionInfo: string; stdcall;
+
+function BufferToHex(const AData: Pointer; ALen: Integer): string;
+
+implementation
+
+{$IFDEF BE_STATICLINK}
 
 {$IFDEF FPC}
   {$IFDEF MSWINDOWS} {$IFDEF CPUX64}
@@ -393,72 +562,88 @@ function BeaEngineRevision: PAnsiChar; stdcall; external BeaEngineLib Name BeaEn
     {$L 'Linux32\BeaEngine.o'}
   {$ENDIF} {$ENDIF}
 {$ELSE}
-  {$IFDEF CPUX64}
+  {$IFDEF MSWINDOWS} {$IFDEF CPUX64}
+    // from beaengine-bin-5.3.0.zip\lib_static_x64\BeaEngine.lib
     {$L 'Win64\BeaEngine.obj'}
   {$ELSE}
+    // from beaengine-src-5.3.0.zip\bcb\BeaEngineLib.cbproj + BEA_ENGINE_STATIC;BEA_LACKS_SNPRINTF;BEA_USE_STDCALL
     {$L 'Win32\BeaEngine.obj'}
-  {$ENDIF}
+  {$ENDIF} {$ENDIF}
   {$WARN BAD_GLOBAL_SYMBOL OFF}
 {$ENDIF}
 
 const
-{$IFDEF MSWINDOWS}
-  libc                  = 'msvcrt.dll';
-  _PC                   = '';
-{$ENDIF}
-{$IFDEF MACOS}
-  libc                  = '/usr/lib/libc.dylib';
-  _PC                   = _PU;
-{$ENDIF}
-{$IFDEF LINUX}
-  libc                  = 'c';
-  _PC                   = _PU;
-{$ENDIF}
+  msvcrt = 'msvcrt.dll';
 
-function memset(dest: Pointer; val: Integer; count: size_t): Pointer; cdecl;
-  external libc name _PC + 'memset';
-function sprintf(buf: Pointer; format: PAnsiChar {args}): Integer; cdecl; varargs;
-  external libc name _PC + 'sprintf';
-function strcmp(s1: PAnsiChar; s2: PAnsiChar): Integer; cdecl;
-  external libc name _PC + 'strcmp';
-function strcpy(dest, src: PAnsiChar): PAnsiChar; cdecl;
-  external libc name _PC + 'strcpy';
-function strlen(s: PAnsiChar): size_t; cdecl;
-  external libc name _PC + 'strlen';
-
-{$IFDEF FPC}
-function _memset(dest: Pointer; val: Integer; count: size_t): Pointer; cdecl; public name _PU + 'memset';
-begin
-  Result := memset(dest, val, count);
-end;
-function _sprintf(buf: Pointer; format: PAnsiChar {args}): Integer; cdecl; {varargs;} public name _PU + 'sprintf';
-begin
-  Result := sprintf(buf, format);
-end;
-function _strcmp(s1: PAnsiChar; s2: PAnsiChar): Integer; cdecl; public name _PU + 'strcmp';
-begin
-  Result := strcmp(s1, s2);
-end;
-function _strcpy(dest, src: PAnsiChar): PAnsiChar; cdecl; public name _PU + 'strcpy';
-begin
-  Result := strcpy(dest, src);
-end;
-function _strlen(s: PAnsiChar): size_t; cdecl; public name _PU + 'strlen';
-begin
-  Result := strlen(s);
-end;
-{$ENDIF}
-
-{$IFDEF FPC}
-function Disasm(var aDisAsm: TDISASM): LongInt; stdcall; external Name DisasmName;
-function BeaEngineVersion: PAnsiChar; stdcall; external Name BeaEngineVersionName;
-function BeaEngineRevision: PAnsiChar; stdcall; external Name BeaEngineRevisionName;
+{$IFDEF BE_USE_UNDERSCORE}
+procedure _memcpy; cdecl; external msvcrt name 'memcpy';
 {$ELSE}
-function Disasm(var aDisAsm: TDISASM): LongInt; stdcall; external; { Delphi/BCB }
-function BeaEngineVersion: PAnsiChar; stdcall; external;
-function BeaEngineRevision: PAnsiChar; stdcall; external;
+procedure memcpy; cdecl; external msvcrt name 'memcpy';
 {$ENDIF}
 
+{$IFDEF BE_USE_UNDERSCORE}
+procedure _memset; cdecl; external msvcrt name 'memset';
+{$ELSE}
+procedure memset; cdecl; external msvcrt name 'memset';
 {$ENDIF}
+
+{$IFDEF BE_USE_UNDERSCORE}
+procedure _strcmp; cdecl; external msvcrt name 'strcmp';
+{$ELSE}
+procedure strcmp; cdecl; external msvcrt name 'strcmp';
+{$ENDIF}
+
+{$IFDEF BE_USE_UNDERSCORE}
+procedure _strcpy; cdecl; external msvcrt name 'strcpy';
+{$ELSE}
+procedure strcpy; cdecl; external msvcrt name 'strcpy';
+{$ENDIF}
+
+{$IFDEF BE_USE_UNDERSCORE}
+procedure _strlen; cdecl; external msvcrt name 'strlen';
+{$ELSE}
+procedure strlen; cdecl; external msvcrt name 'strlen';
+{$ENDIF}
+
+{$IFDEF BE_USE_UNDERSCORE}
+procedure _sprintf; cdecl; external msvcrt name 'sprintf';
+{$ELSE}
+procedure sprintf; cdecl; external msvcrt name 'sprintf';
+{$ENDIF}
+
+{$ENDIF BE_STATICLINK}
+
+function BeaEngineVersionInfo: string; stdcall;
+begin
+{$IFDEF CPUX64}
+  Result := 'v' + string(BeaEngineVersion) + ' (Rev' + string(BeaEngineRevision) + ',x64)';
+{$ELSE}
+  Result := 'v' + string(BeaEngineVersion) + ' (Rev' + string(BeaEngineRevision) + ',x32)';
+{$ENDIF}
+end;
+
+function BufferToHex(const AData: Pointer; ALen: Integer): string;
+const
+  defCharConvertTable: array[0..15] of Char = (
+    '0', '1', '2', '3', '4', '5', '6', '7',
+    '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'
+  );
+var
+  pData: PByte;
+  pRet: PChar;
+begin
+  pData := AData;
+  SetLength(Result, 2 * ALen);
+  pRet := PChar(Result);
+  while ALen > 0 do
+  begin
+    pRet^ := defCharConvertTable[(pData^ and $F0) shr 4];
+    Inc(pRet);
+    pRet^ := defCharConvertTable[pData^ and $0F];
+    Inc(pRet);
+    Dec(ALen);
+    Inc(pData);
+  end;
+end;
 
 end.

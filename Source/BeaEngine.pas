@@ -25,9 +25,6 @@ unit BeaEngine;
 {.$DEFINE BE_STATICLINK}
 
 {$IFDEF BE_STATICLINK}
-  {$IFDEF FPC}
-    {$MESSAGE ERROR 'staticlink not supported'}
-  {$ENDIF}
   {$IFNDEF MSWINDOWS}
     {$MESSAGE ERROR 'staticlink not supported'}
   {$ENDIF}
@@ -83,6 +80,8 @@ type
     state: UInt8;
   end;
 
+  // This structure gives informations on used prefixes. When can know if some prefixes
+  // are used properly or not.
   PREFIXINFO = packed record
     Number: Integer;
     NbUndefined: Integer;
@@ -103,6 +102,7 @@ type
     alignment: array [0..1] of AnsiChar;
   end;
 
+  // This structure gives informations on the register EFLAGS.
   EFLStruct = packed record
     OF_: UInt8;
     SF_: UInt8;
@@ -118,6 +118,7 @@ type
     alignment: UInt8;
   end;
 
+  // This structure gives informations if infos.Operandxx.OpType == MEMORY_TYPE.
   MEMORYTYPE = packed record
     BaseRegister: Int64;
     IndexRegister: Int64;
@@ -125,6 +126,8 @@ type
     Displacement: Int64;
   end;
 
+  // This structure gives informations on operands if: infos.Operandxx.OpType ==
+  // REGISTER_TYPE or if infos.Instruction.ImplicitModifiedRegs is filled
   REGISTERTYPE = packed record
     type_: Int64;
     gpr: Int64;
@@ -143,26 +146,66 @@ type
     tmm: Int64;
   end;
 
+  // This structure gives informations on the analyzed instruction.
   INSTRTYPE = packed record
+    // [out] Specify the family instruction . More precisely, (infos.Instruction.Category
+    // & 0xFFFF0000) is used to know if the instruction is a standard one or comes
+    // from one of the following technologies: MMX, FPU, SSE, SSE2, SSE3, SSSE3, SSE4.1,
+    // SSE4.2, VMX or SYSTEM.LOWORD(infos.Instruction.Category) is used to know if
+    // the instruction is an arithmetic instruction, a logical one, a data transfer
+    // one ... To see the complete list of constants used by BeaEngine, go HERE .
     Category: Int32;
+    // [out] This field contains the opcode on 1, 2 or 3 bytes. If the instruction
+    // uses a mandatory prefix, this last one is not present here. For that,
+    // you have to use the structure infos.Prefix.
     Opcode: Int32;
+    // [out] This field sends back the instruction mnemonic with an ASCII format.
+    // You must know that all mnemonics are followed by a space (0x20). For example ,
+    // the instruction "add" is written "add ".
     Mnemonic: array [0..23] of AnsiChar;
+    // [out] If the decoded instruction is a branch instruction, this field is set to
+    // indicate what kind of jump it is (call, ret, unconditional jump, conditional jump).
+    // To get a complete list of constants used by BeaEngine, go HERE
     BranchType: Int32;
+    // [out] Structure EFLStruct that specifies the used flags.
     Flags: EFLStruct;
+    // [out] If the decoded instruction is a branch instruction and if the destination
+    // address can be calculated, the result is stored in that field. A "jmp eax" or
+    // a "jmp [eax]" will set this field to 0 .
     AddrValue: UInt64;
+    // [out] If the instruction uses a constant, this immediat value is stored here.
     Immediat: Int64;
+    // [out] Some instructions modify registers implicitly. For example, "push 0" modifies
+    // the register RSP. In that case, infos.Instruction.ImplicitModifiedRegs.gpr == REG4.
+    // Find more useful informations on that field looking at the Structure REGISTERTYPE
     ImplicitModifiedRegs: REGISTERTYPE;
+    // [out] Some instructions use registers implicitly. Find more useful informations
+    // on that field looking at the Structure REGISTERTYPE
     ImplicitUsedRegs: REGISTERTYPE;
   end;
 
+  // This structure gives informations about the operand analyzed.
   OPTYPE = packed record
+    // [out] This field sends back, when it is possible, the operand in ASCII format.
     OpMnemonic: array [0..23] of AnsiChar;
+    // [out] This field specifies the operand type. infos.Operandxx.OpType indicates
+    // if it is one of the following :
+    // * REGISTER_TYPE
+    // * MEMORY_TYPE
+    // * CONSTANT_TYPE+ABSOLUTE_
+    // * CONSTANT_TYPE+RELATIVE_
     OpType: Int64;
+    // [out] This field sends back the size of the operand.
     OpSize: Int32;
     OpPosition: Int32;
+    // [out] This field indicates if the operand is modified or not (READ=0x1) or (WRITE=0x2).
     AccessMode: UInt32;
+    // [out] Structure MEMORYTYPE , filled only if infos.Operandxx.OpType == MEMORY_TYPE.
     Memory: MEMORYTYPE;
+    // [out] Structure REGISTERTYPE , filled only if infos.Operandxx.OpType == REGISTER_TYPE.
     Registers: REGISTERTYPE;
+    // [out] This field indicates, in the case of memory addressing mode, the segment
+    // register used : ESReg, DSReg, FSReg, GSReg, CSReg, SSReg
     SegmentReg: UInt32;
   end;
 
@@ -208,25 +251,71 @@ type
 
   //* ************** main structure ************ */
 
+  // This structure is used to store the mnemonic, source and destination operands.
+  // You just have to specify the address where the engine has to make the analysis.
   _Disasm = packed record
+    // [in] Offset of bytes sequence we want to disassemble
     EIP: UIntPtr;
+    // [in] optional - (For instructions CALL - JMP - conditional JMP - LOOP) By default,
+    // this value is 0 (disable). The disassembler calculates the destination address of
+    // the branch instruction using VirtualAddr (not EIP). This address can be 64 bits long.
+    // This option allows us to decode instructions located anywhere in memory even
+    // if they are not at their original place
     VirtualAddr: UInt64;
+    // [in] By default, this value is 0. (disabled option). In other cases, this number
+    // is the number of bytes the engine is allowed to read since EIP. Thus,
+    // we can make a read block to avoid some Access violation. On INTEL processors,
+    // (in IA-32 or intel 64 modes) , instruction never exceeds 15 bytes.
+    // A SecurityBlock value outside this range is useless.
     SecurityBlock: UInt32;
+    // [out] String used to store the instruction representation
     CompleteInstr: array [0..79] of AnsiChar;
+    // [in] This field is used to specify the architecture used for the decoding.
+    // If it is set to 0 or 64 (0x20), the architecture used is 64 bits. If it is
+    // set to 32 (0x20), the architecture used is IA-32. If set to 16 (0x10),
+    // architecture is 16 bits.
     Archi: UInt32;
+    // [in] This field allows to define some display options. You can specify the
+    // syntax: masm, nasm ,goasm. You can specify the number format you want to use:
+    // prefixed numbers or suffixed ones. You can even add a tabulation between the
+    // mnemonic and the first operand or display the segment registers used by the
+    // memory addressing. Constants used are the following :
+    // * Tabulation: add a tabulation between mnemonic and first operand (default has no tabulation)
+    // * GoAsmSyntax / NasmSyntax: change the intel syntax (default is Masm syntax)
+    // * PrefixedNumeral: 200h is written 0x200 (default is suffixed numeral)
+    // * ShowSegmentRegs: show segment registers used (default is hidden)
+    // * ShowEVEXMasking: show opmask and merging/zeroing applyed on first operand for AVX512 instructions (default is hidden)
     Options: UInt64;
+    // [out] Structure INSTRTYPE.
     Instruction: INSTRTYPE;
+    // [out] Structure OPTYPE that concerns the first operand.
     Operand1: OPTYPE;
+    // [out] Structure OPTYPE that concerns the second operand.
     Operand2: OPTYPE;
+    // [out] Structure OPTYPE that concerns the third operand.
     Operand3: OPTYPE;
+    // [out] Structure OPTYPE that concerns the fourth operand.
     Operand4: OPTYPE;
+    // [out] Structure OPTYPE that concerns the fifth operand.
     Operand5: OPTYPE;
+    // [out] Structure OPTYPE that concerns the sixth operand.
     Operand6: OPTYPE;
+    // [out] Structure OPTYPE that concerns the seventh operand.
     Operand7: OPTYPE;
+    // [out] Structure OPTYPE that concerns the eighth operand.
     Operand8: OPTYPE;
+    // [out] Structure OPTYPE that concerns the ninth operand.
     Operand9: OPTYPE;
+    // [out] Structure PREFIXINFO containing an exhaustive list of used prefixes.
     Prefix: PREFIXINFO;
+    // [out] This field returns the status of the disassemble process :
+    // * Success: (0) instruction has been recognized by the engine
+    // * Out of block: (-2) instruction length is out of SecurityBlock
+    // * Unknown opcode: (-1) instruction is not recognized by the engine
+    // * Exception #UD: (2) instruction has been decoded properly but sends #UD exception if executed.
+    // * Exception #DE: (3) instruction has been decoded properly but sends #DE exception if executed
     Error: Int32;
+    // reserved structure used for thread-safety, unusable by customer
     Reserved_: InternalDatas;
   end;
   TDisasm = _Disasm;
@@ -238,6 +327,7 @@ const
   DE__                  = 3;
 
 const
+  // Values taken by infos.Operandxx.SegmentReg
   ESReg                 = $01;
   DSReg                 = $02;
   FSReg                 = $04;
@@ -246,6 +336,7 @@ const
   SSReg                 = $20;
 
 const
+  // Concerns the LOCK prefix
   InvalidPrefix         = 4;
   SuperfluousPrefix     = 2;
   NotUsedPrefix         = 0;
@@ -283,6 +374,8 @@ const
 type
   INSTRUCTION_TYPE = Integer;
 const
+  // Here is an exhaustive list of constants used by fields sends back by BeaEngine.
+  // Values taken by (infos.Instruction.Category & 0xFFFF0000)
   GENERAL_PURPOSE_INSTRUCTION = $10000;
   FPU_INSTRUCTION       = $20000;
   MMX_INSTRUCTION       = $30000;
@@ -320,6 +413,7 @@ const
   AMX_INSTRUCTION       = $230000;
 
 const
+  // Values taken by LOWORD(infos.Instruction.Category)
   DATA_TRANSFER         = 1;
   ARITHMETIC_INSTRUCTION = 2;
   LOGICAL_INSTRUCTION   = 3;
@@ -367,6 +461,7 @@ const
 type
   EFLAGS_STATES = Integer;
 const
+  // Values taken by infos.Instruction.Flags.OF_ , .SF_ ...
   TE_                   = $01;
   MO_                   = $02;
   RE_                   = $04;
@@ -377,6 +472,7 @@ const
 type
   BRANCH_TYPE = Integer;
 const
+  // Values taken by infos.Instruction.BranchType
   JO                    = 1;
   JC                    = 2;
   JE                    = 3;
@@ -403,6 +499,7 @@ const
 type
   ARGUMENTS_TYPE = Integer;
 const
+  // Values taken by infos.Operandxx.OpType
   NO_ARGUMENT           = $10000;
   REGISTER_TYPE         = $20000;
   MEMORY_TYPE           = $30000;
@@ -426,6 +523,7 @@ const
   RELATIVE_             = $4000000;
   ABSOLUTE_             = $8000000;
 
+  // OPTYPE.AccessMode, indicates if the operand is modified or not
   READ                  = $1;
   WRITE                 = $2;
 
@@ -468,6 +566,8 @@ const
   UNKNOWN_OPCODE        = -1;
   OUT_OF_BLOCK          = -2;
 
+  // Values taken by infos.Options
+
   //* === mask = 0xff */
   NoTabulation          = $00000000;
   Tabulation            = $00000001;
@@ -488,9 +588,19 @@ const
   ShowEVEXMasking       = $02000000;
 
 const
+  // _Disasm.Archi
+  ARCHI_X16             = $10;
+  ARCHI_X32             = $20;
+  ARCHI_X64             = $40;
+
+const
+  OPCODE_RET            = $C3;
+
+const
 {$IFDEF MSWINDOWS}
-  // win32 from beaengine-src-5.3.0.zip\build\obj\Windows.msvc.Debug\src\BeaEngine_d_l_stdcall.vcxproj + BUILD_BEA_ENGINE_DLL;BEA_LACKS_SNPRINTF;BEA_USE_STDCALL
-  // win64 from beaengine-bin-5.3.0.zip\dll_x64\BeaEngine.dll
+  // Win32 from beaengine-src-5.3.0.zip\build\obj\Windows.msvc.Debug\src\BeaEngine_d_l_stdcall.vcxproj
+  //     + BUILD_BEA_ENGINE_DLL;BEA_LACKS_SNPRINTF;BEA_USE_STDCALL + VC-LTL 5
+  // Win64 from beaengine-bin-5.3.0.zip\dll_x64\BeaEngine.dll
   BeaEngineLib   = 'BeaEngine.dll';
 {$ENDIF}
 {$IFDEF LINUX}
@@ -526,8 +636,17 @@ const
   DisasmName            = '_Disasm@4';
 {$ENDIF} {$ENDIF}
 
-// The Disasm function disassembles one instruction from the Intel ISA.
-// It makes a precise analysis of the focused instruction and sends back a complete structure that is usable to make data-flow and control-flow studies.
+// The Disasm function disassembles one instruction from the Intel ISA. It makes a precise
+// analysis of the focused instruction and sends back a complete structure that is usable
+// to make data-flow and control-flow studies.
+// Parameters
+// infos: Pointer to a structure PDISASM
+// Return
+// The function may sends you back 3 values. if the analyzed bytes sequence is an invalid
+// opcode, it sends back UNKNOWN_OPCODE (-1). If it tried to read a byte located outside
+// the Security Block, it sends back OUT_OF_BLOCK (-2). In others cases, it sends back
+// the instruction length. Thus, you can use it as a LDE. To have a detailed status,
+// use infos.Error field.
 function Disasm(var aDisAsm: TDisasm): LongInt; stdcall;
   external {$IFDEF BE_USE_EXTNAME}BeaEngineLib{$ENDIF} name DisasmName;
 
@@ -547,8 +666,12 @@ implementation
 
 {$IFDEF FPC}
   {$IFDEF MSWINDOWS} {$IFDEF CPUX64}
+    // Win64 from beaengine-src-5.3.0.zip\cb\BeaEngineLib.cbp + TDM-GCC-64 9.2.0
+    //     + BEA_ENGINE_STATIC;BEA_LACKS_SNPRINTF;BEA_USE_STDCALL
     {$L 'Win64\BeaEngine.o'}
   {$ELSE}
+    // Win32 from beaengine-src-5.3.0.zip\cb\BeaEngineLib.cbp + TDM-GCC-32 9.2.0
+    //     + BEA_ENGINE_STATIC;BEA_LACKS_SNPRINTF;BEA_USE_STDCALL
     {$L 'Win32\BeaEngine.o'}
   {$ENDIF} {$ENDIF}
   {$IFDEF MACOS} {$IFDEF CPUX64}
@@ -563,10 +686,11 @@ implementation
   {$ENDIF} {$ENDIF}
 {$ELSE}
   {$IFDEF MSWINDOWS} {$IFDEF CPUX64}
-    // from beaengine-bin-5.3.0.zip\lib_static_x64\BeaEngine.lib
+    // Win64 from beaengine-bin-5.3.0.zip\lib_static_x64\BeaEngine.lib
     {$L 'Win64\BeaEngine.obj'}
   {$ELSE}
-    // from beaengine-src-5.3.0.zip\bcb\BeaEngineLib.cbproj + BEA_ENGINE_STATIC;BEA_LACKS_SNPRINTF;BEA_USE_STDCALL
+    // Win32 from beaengine-src-5.3.0.zip\bcb\BeaEngineLib.cbproj
+    //     + BEA_ENGINE_STATIC;BEA_LACKS_SNPRINTF;BEA_USE_STDCALL
     {$L 'Win32\BeaEngine.obj'}
   {$ENDIF} {$ENDIF}
   {$WARN BAD_GLOBAL_SYMBOL OFF}
@@ -609,6 +733,32 @@ procedure strlen; cdecl; external msvcrt name 'strlen';
 procedure _sprintf; cdecl; external msvcrt name 'sprintf';
 {$ELSE}
 procedure sprintf; cdecl; external msvcrt name 'sprintf';
+{$ENDIF}
+
+{$IFDEF FPC}
+
+const
+{$IFDEF CPU64}
+  _PREFIX = '';
+{$ELSE}
+  _PREFIX = '_';
+{$ENDIF CPU64}
+
+procedure impl_strcpy; assembler; nostackframe; public name _PREFIX + 'strcpy';
+asm
+  jmp {$IFDEF BE_USE_UNDERSCORE}_strcpy{$ELSE}strcpy{$ENDIF}
+end;
+
+procedure impl_strlen; assembler; nostackframe; public name _PREFIX + 'strlen';
+asm
+  jmp {$IFDEF BE_USE_UNDERSCORE}_strlen{$ELSE}strlen{$ENDIF}
+end;
+
+procedure impl_sprintf; assembler; nostackframe; public name _PREFIX + 'sprintf';
+asm
+  jmp {$IFDEF BE_USE_UNDERSCORE}_sprintf{$ELSE}sprintf{$ENDIF}
+end;
+
 {$ENDIF}
 
 {$ENDIF BE_STATICLINK}

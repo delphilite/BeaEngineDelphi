@@ -608,9 +608,9 @@ const
 {$ENDIF}
 {$IFDEF MACOS}
   {$IF DEFINED(IOS) or DEFINED(MACOS64)}
-    BeaEngineLib = '/usr/lib/libBeaEngine.dylib';
+  BeaEngineLib   = '/usr/lib/libBeaEngine.dylib';
   {$ELSE}
-    BeaEngineLib = 'libBeaEngine.dylib';
+  BeaEngineLib   = 'libBeaEngine.dylib';
   {$IFEND}
 {$ENDIF}
 {$IF DEFINED(FPC) and DEFINED(DARWIN)}
@@ -619,22 +619,30 @@ const
 {$IFEND}
 {$IFDEF ANDROID}
   BeaEngineLib   = 'libBeaEngine.so';
-{$ENDIF ANDROID}
+{$ENDIF}
 
 const
-{$IFDEF CPUX64}
+{$IFDEF FPC}
+  {$IFDEF CPUX64}
   BeaEngineRevisionName = 'BeaEngineRevision';
   BeaEngineVersionName  = 'BeaEngineVersion';
   DisasmName            = 'Disasm';
-{$ELSE} {$IFDEF LINUX}
-  BeaEngineRevisionName = 'BEAENGINE_$$_BEAENGINEREVISION$$PCHAR';
-  BeaEngineVersionName  = 'BEAENGINE_$$_BEAENGINEVERSION$$PCHAR';
-  DisasmName            = 'BEAENGINE_$$_DISASM$TDISASM$$LONGINT';
-{$ELSE}
+  {$ELSE}
   BeaEngineRevisionName = '_BeaEngineRevision@0';
   BeaEngineVersionName  = '_BeaEngineVersion@0';
   DisasmName            = '_Disasm@4';
-{$ENDIF} {$ENDIF}
+  {$ENDIF}
+{$ELSE}
+  {$IF DEFINED(CPUX64) or DEFINED(BE_STATICLINK)}
+  BeaEngineRevisionName = 'BeaEngineRevision';
+  BeaEngineVersionName  = 'BeaEngineVersion';
+  DisasmName            = 'Disasm';
+  {$ELSE}
+  BeaEngineRevisionName = '_BeaEngineRevision@0';
+  BeaEngineVersionName  = '_BeaEngineVersion@0';
+  DisasmName            = '_Disasm@4';
+  {$IFEND}
+{$ENDIF}
 
 // The Disasm function disassembles one instruction from the Intel ISA. It makes a precise
 // analysis of the focused instruction and sends back a complete structure that is usable
@@ -688,12 +696,12 @@ implementation
   {$IFDEF MSWINDOWS} {$IFDEF CPUX64}
     // Win64 from beaengine-bin-5.3.0.zip\lib_static_x64\BeaEngine.lib
     {$L 'Win64\BeaEngine.obj'}
+    {$WARN BAD_GLOBAL_SYMBOL OFF}
   {$ELSE}
     // Win32 from beaengine-src-5.3.0.zip\bcb\BeaEngineLib.cbproj
     //     + BEA_ENGINE_STATIC;BEA_LACKS_SNPRINTF;BEA_USE_STDCALL
     {$L 'Win32\BeaEngine.obj'}
   {$ENDIF} {$ENDIF}
-  {$WARN BAD_GLOBAL_SYMBOL OFF}
 {$ENDIF}
 
 const
@@ -738,10 +746,10 @@ procedure sprintf; cdecl; external msvcrt name 'sprintf';
 {$IFDEF FPC}
 
 const
-{$IFDEF CPU64}
-  _PREFIX = '';
-{$ELSE}
+{$IFDEF BE_USE_UNDERSCORE}
   _PREFIX = '_';
+{$ELSE}
+  _PREFIX = '';
 {$ENDIF CPU64}
 
 procedure impl_strcpy; assembler; nostackframe; public name _PREFIX + 'strcpy';

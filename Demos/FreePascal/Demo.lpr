@@ -12,13 +12,13 @@ var
   pData: PByte;
   B, S: string;
 begin
-  FillChar(aDisasm, SizeOf(TDISASM), 0);
-  aDisasm.EIP := UIntPtr(AFunc);
+  FillChar(aDisasm, SizeOf(aDisasm), 0);
 {$IFDEF CPUX64}
-  aDisasm.Archi := 64;
+  aDisasm.Archi := ARCHI_X64;
 {$ELSE}
-  aDisasm.Archi := 0;
+  aDisasm.Archi := ARCHI_X32;
 {$ENDIF}
+  aDisasm.EIP := UIntPtr(AFunc);
   aDisasm.Options := NoTabulation + MasmSyntax;
   pData := PByte(AFunc);
   repeat
@@ -28,7 +28,7 @@ begin
     Writeln(S);
     aDisasm.EIP := aDisasm.EIP + nLen;
     Inc(pData, nLen);
-  until (aDisasm.Instruction.Opcode = $C3) or (nLen <= 0);
+  until (aDisasm.Instruction.Opcode = OPCODE_RET) or (nLen <= 0);
 end;
 
 begin

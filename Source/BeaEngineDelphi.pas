@@ -20,7 +20,7 @@
 {$MINENUMSIZE 4}
 {$WEAKPACKAGEUNIT}
 
-unit BeaEngine;
+unit BeaEngineDelphi;
 
 {.$DEFINE BE_STATICLINK}
 
@@ -696,7 +696,6 @@ implementation
   {$IFDEF MSWINDOWS} {$IFDEF CPUX64}
     // Win64 from beaengine-bin-5.3.0.zip\lib_static_x64\BeaEngine.lib
     {$L 'Win64\BeaEngine.obj'}
-    {$WARN BAD_GLOBAL_SYMBOL OFF}
   {$ELSE}
     // Win32 from beaengine-src-5.3.0.zip\bcb\BeaEngineLib.cbproj
     //     + BEA_ENGINE_STATIC;BEA_LACKS_SNPRINTF;BEA_USE_STDCALL
@@ -705,42 +704,42 @@ implementation
 {$ENDIF}
 
 const
-  msvcrt = 'msvcrt.dll';
+  libc = 'msvcrt.dll';
 
 {$IFDEF BE_USE_UNDERSCORE}
-procedure _memcpy; cdecl; external msvcrt name 'memcpy';
+procedure _memcpy; cdecl; external libc name 'memcpy';
 {$ELSE}
-procedure memcpy; cdecl; external msvcrt name 'memcpy';
+procedure memcpy; cdecl; external libc name 'memcpy';
 {$ENDIF}
 
 {$IFDEF BE_USE_UNDERSCORE}
-procedure _memset; cdecl; external msvcrt name 'memset';
+procedure _memset; cdecl; external libc name 'memset';
 {$ELSE}
-procedure memset; cdecl; external msvcrt name 'memset';
+procedure memset; cdecl; external libc name 'memset';
 {$ENDIF}
 
 {$IFDEF BE_USE_UNDERSCORE}
-procedure _strcmp; cdecl; external msvcrt name 'strcmp';
+procedure _strcmp; cdecl; external libc name 'strcmp';
 {$ELSE}
-procedure strcmp; cdecl; external msvcrt name 'strcmp';
+procedure strcmp; cdecl; external libc name 'strcmp';
 {$ENDIF}
 
 {$IFDEF BE_USE_UNDERSCORE}
-procedure _strcpy; cdecl; external msvcrt name 'strcpy';
+procedure _strcpy; cdecl; external libc name 'strcpy';
 {$ELSE}
-procedure strcpy; cdecl; external msvcrt name 'strcpy';
+procedure strcpy; cdecl; external libc name 'strcpy';
 {$ENDIF}
 
 {$IFDEF BE_USE_UNDERSCORE}
-procedure _strlen; cdecl; external msvcrt name 'strlen';
+procedure _strlen; cdecl; external libc name 'strlen';
 {$ELSE}
-procedure strlen; cdecl; external msvcrt name 'strlen';
+procedure strlen; cdecl; external libc name 'strlen';
 {$ENDIF}
 
 {$IFDEF BE_USE_UNDERSCORE}
-procedure _sprintf; cdecl; external msvcrt name 'sprintf';
+procedure _sprintf; cdecl; external libc name 'sprintf';
 {$ELSE}
-procedure sprintf; cdecl; external msvcrt name 'sprintf';
+procedure sprintf; cdecl; external libc name 'sprintf';
 {$ENDIF}
 
 {$IFDEF FPC}

@@ -3,7 +3,7 @@ program Demo;
 {$mode objfpc}{$H+}
 
 uses
-  SysUtils, BeaEngine;
+  SysUtils, BeaEngineDelphi;
 
 procedure DisAsmFunctionCode(const AFunc: Pointer);
 var

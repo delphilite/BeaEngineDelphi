@@ -10,7 +10,7 @@ program Demo;
 {$R *.res}
 
 uses
-  SysUtils, BeaEngine;
+  SysUtils, BeaEngineDelphi;
 
 procedure DisAsmFunctionCode(const AFunc: Pointer);
 var

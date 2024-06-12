@@ -19,11 +19,11 @@ To install the BeaEngineDelphi binding, follow these steps:
 2. Add the BeaEngineDelphi\Source directory to the project or IDE's search path.
 
 ## Usage
-Included is the wrapper record `TDisasm` in `BeaEngine.pas`. The example bellow is incomplete, but it may give you an impression how to use it.
+Included is the wrapper record `TDisasm` in `BeaEngineDelphi.pas`. The example bellow is incomplete, but it may give you an impression how to use it.
 
 ```pas
 uses
-  SysUtils, BeaEngine;
+  SysUtils, BeaEngineDelphi;
 
 procedure DisAsmFunctionCode(const AFunc: Pointer);
 var
@@ -52,7 +52,6 @@ begin
 end;
 
 begin
-  ReportMemoryLeaksOnShutdown := True;
   try
     WriteLn(Format('BeaEngine: %s, DisAsm ExpandFileNameCase ...', [BeaEngineVersionInfo]));
     WriteLn('');

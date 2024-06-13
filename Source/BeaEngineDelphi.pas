@@ -598,9 +598,8 @@ const
 
 const
 {$IFDEF MSWINDOWS}
-  // Win32 from beaengine-src-5.3.0.zip\build\obj\Windows.msvc.Debug\src\BeaEngine_d_l_stdcall.vcxproj
-  //     + BUILD_BEA_ENGINE_DLL;BEA_LACKS_SNPRINTF;BEA_USE_STDCALL + VC-LTL 5
-  // Win64 from beaengine-bin-5.3.0.zip\dll_x64\BeaEngine.dll
+  // Win32 from Ref\beaengine-5.3.0\CMakeLists.txt -> VS19\BeaEngine_d_l_stdcall.vcxproj + VC-LTL 5
+  // Win64 from Ref\beaengine-5.3.0\dll_x64\BeaEngine.dll
   BeaEngineLib   = 'BeaEngine.dll';
 {$ENDIF}
 {$IFDEF LINUX}
@@ -674,12 +673,10 @@ implementation
 
 {$IFDEF FPC}
   {$IFDEF MSWINDOWS} {$IFDEF CPUX64}
-    // Win64 from beaengine-src-5.3.0.zip\cb\BeaEngineLib.cbp + TDM-GCC-64 9.2.0
-    //     + BEA_ENGINE_STATIC;BEA_LACKS_SNPRINTF;BEA_USE_STDCALL
+    // Win64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + TDM-GCC-64 9.2.0 x64-Release
     {$L 'Win64\BeaEngine.o'}
   {$ELSE}
-    // Win32 from beaengine-src-5.3.0.zip\cb\BeaEngineLib.cbp + TDM-GCC-32 9.2.0
-    //     + BEA_ENGINE_STATIC;BEA_LACKS_SNPRINTF;BEA_USE_STDCALL
+    // Win32 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + TDM-GCC-64 9.2.0 x32-Release
     {$L 'Win32\BeaEngine.o'}
   {$ENDIF} {$ENDIF}
   {$IFDEF MACOS} {$IFDEF CPUX64}
@@ -694,11 +691,10 @@ implementation
   {$ENDIF} {$ENDIF}
 {$ELSE}
   {$IFDEF MSWINDOWS} {$IFDEF CPUX64}
-    // Win64 from beaengine-bin-5.3.0.zip\lib_static_x64\BeaEngine.lib
+    // Win64 from Ref\beaengine-5.3.0\lib_static_x64\BeaEngine.lib
     {$L 'Win64\BeaEngine.obj'}
   {$ELSE}
-    // Win32 from beaengine-src-5.3.0.zip\bcb\BeaEngineLib.cbproj
-    //     + BEA_ENGINE_STATIC;BEA_LACKS_SNPRINTF;BEA_USE_STDCALL
+    // Win32 from Ref\beaengine-5.3.0\bcb\BeaEngineLib.cbproj + BCB 12.1 x32-Release
     {$L 'Win32\BeaEngine.obj'}
   {$ENDIF} {$ENDIF}
 {$ENDIF}
@@ -770,7 +766,7 @@ end;
 
 {$ENDIF BE_STATICLINK}
 
-function BeaEngineVersionInfo: string; stdcall;
+function BeaEngineVersionInfo: string;
 begin
 {$IFDEF CPUX64}
   Result := 'v' + string(BeaEngineVersion) + ' (Rev' + string(BeaEngineRevision) + ',x64)';

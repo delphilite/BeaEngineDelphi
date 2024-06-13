@@ -1,3 +1,15 @@
+{ ***************************************************** }
+{                                                       }
+{  Pascal language binding for the BeaEngine            }
+{                                                       }
+{  Unit Name: Demo                                      }
+{     Author: Lsuper 2024.06.01                         }
+{    Purpose: Demo                                      }
+{                                                       }
+{  Copyright (c) 1998-2024 Super Studio                 }
+{                                                       }
+{ ***************************************************** }
+
 program Demo;
 
 {$mode objfpc}{$H+}

@@ -25,15 +25,26 @@ unit BeaEngineDelphi;
 {.$DEFINE BE_STATICLINK}
 
 {$IFDEF BE_STATICLINK}
-  {$IFNDEF MSWINDOWS}
-    {$MESSAGE ERROR 'staticlink not supported'}
+  {$IFDEF MSWINDOWS}
+    {$DEFINE BE_USE_EXTNAME}
   {$ENDIF}
-  {$IFNDEF CPUX64}
-    {$DEFINE BE_USE_UNDERSCORE}
+  {$IFDEF LINUX}
+    {.$DEFINE BE_USE_EXTNAME}
   {$ENDIF}
+  {.$MESSAGE ERROR 'staticlink not supported'}
 {$ELSE}
+  {$DEFINE BE_USE_EXTLIB}
   {$DEFINE BE_USE_EXTNAME}
 {$ENDIF}
+
+{$IF DEFINED(MSWINDOWS) and DEFINED(CPUX86)}
+  {$IFDEF DELPHI}
+    {.$DEFINE BE_EXP_UNDERSCORE} { for bcb omf object file }
+  {$ELSE}
+    {$DEFINE BE_EXP_UNDERSCORE}
+  {$ENDIF}
+  {$DEFINE BE_IMP_UNDERSCORE}
+{$IFEND}
 
 interface
 
@@ -621,26 +632,14 @@ const
 {$ENDIF}
 
 const
-{$IFDEF FPC}
-  {$IFDEF CPUX64}
-  BeaEngineRevisionName = 'BeaEngineRevision';
-  BeaEngineVersionName  = 'BeaEngineVersion';
-  DisasmName            = 'Disasm';
-  {$ELSE}
+{$IFDEF BE_EXP_UNDERSCORE}
   BeaEngineRevisionName = '_BeaEngineRevision@0';
   BeaEngineVersionName  = '_BeaEngineVersion@0';
   DisasmName            = '_Disasm@4';
-  {$ENDIF}
 {$ELSE}
-  {$IF DEFINED(CPUX64) or DEFINED(BE_STATICLINK)}
   BeaEngineRevisionName = 'BeaEngineRevision';
   BeaEngineVersionName  = 'BeaEngineVersion';
   DisasmName            = 'Disasm';
-  {$ELSE}
-  BeaEngineRevisionName = '_BeaEngineRevision@0';
-  BeaEngineVersionName  = '_BeaEngineVersion@0';
-  DisasmName            = '_Disasm@4';
-  {$IFEND}
 {$ENDIF}
 
 // The Disasm function disassembles one instruction from the Intel ISA. It makes a precise
@@ -655,13 +654,13 @@ const
 // the instruction length. Thus, you can use it as a LDE. To have a detailed status,
 // use infos.Error field.
 function Disasm(var aDisAsm: TDisasm): LongInt; stdcall;
-  external {$IFDEF BE_USE_EXTNAME}BeaEngineLib{$ENDIF} name DisasmName;
+  external {$IFDEF BE_USE_EXTLIB}BeaEngineLib{$ENDIF} {$IFDEF BE_USE_EXTNAME}name DisasmName{$ENDIF};
 
 function BeaEngineVersion: PAnsiChar; stdcall;
-  external {$IFDEF BE_USE_EXTNAME}BeaEngineLib{$ENDIF} name BeaEngineVersionName;
+  external {$IFDEF BE_USE_EXTLIB}BeaEngineLib{$ENDIF} {$IFDEF BE_USE_EXTNAME}name BeaEngineVersionName{$ENDIF};
 
 function BeaEngineRevision: PAnsiChar; stdcall;
-  external {$IFDEF BE_USE_EXTNAME}BeaEngineLib{$ENDIF} name BeaEngineRevisionName;
+  external {$IFDEF BE_USE_EXTLIB}BeaEngineLib{$ENDIF} {$IFDEF BE_USE_EXTNAME}name BeaEngineRevisionName{$ENDIF};
 
 function BeaEngineVersionInfo: string; stdcall;
 
@@ -673,75 +672,84 @@ implementation
 
 {$IFDEF FPC}
   {$IFDEF MSWINDOWS} {$IFDEF CPUX64}
-    // Win64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + TDM-GCC-64 9.2.0 x64-Release
-    {$L 'Win64\BeaEngine.o'}
-  {$ELSE}
-    // Win32 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + TDM-GCC-64 9.2.0 x32-Release
-    {$L 'Win32\BeaEngine.o'}
-  {$ENDIF} {$ENDIF}
-  {$IFDEF MACOS} {$IFDEF CPUX64}
-    {$L 'OSX64\BeaEngine.o'}
-  {$ELSE}
-    {$L 'OSX32\BeaEngine.o'}
-  {$ENDIF} {$ENDIF}
+    // Win64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + TDM-GCC-64 9.2.0 x86_64-win64
+    {$L 'x86_64-win64\BeaEngine.o'}
+  {$ENDIF CPUX64} {$IFDEF CPUX86}
+    // Win32 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + TDM-GCC-64 9.2.0 i386-win32
+    {$L 'i386-win32\BeaEngine.o'}
+  {$ENDIF CPUX86} {$ENDIF}
   {$IFDEF LINUX} {$IFDEF CPUX64}
-    {$L 'Linux64\BeaEngine.o'}
-  {$ELSE}
-    {$L 'Linux32\BeaEngine.o'}
-  {$ENDIF} {$ENDIF}
+    // Linux64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 14.0 x86_64-linux
+    {$L 'x86_64-linux\BeaEngine.o'}
+  {$ENDIF CPUX64} {$IFDEF CPUX86}
+    // Linux32 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 14.0 i386-linux
+    {$L 'i386-linux\BeaEngine.o'}
+  {$ENDIF CPUX86} {$IFDEF CPUAARCH64}
+    // Linux64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 14.0 aarch64-linux
+    {$L 'aarch64-linux\BeaEngine.o'}
+  {$ENDIF CPUAARCH64} {$ENDIF}
 {$ELSE}
   {$IFDEF MSWINDOWS} {$IFDEF CPUX64}
-    // Win64 from Ref\beaengine-5.3.0\lib_static_x64\BeaEngine.lib
-    {$L 'Win64\BeaEngine.obj'}
-  {$ELSE}
-    // Win32 from Ref\beaengine-5.3.0\bcb\BeaEngineLib.cbproj + BCB 12.1 x32-Release
-    {$L 'Win32\BeaEngine.obj'}
-  {$ENDIF} {$ENDIF}
+    // Win64 from Ref\beaengine-5.3.0\lib_static_x64\BeaEngine.lib, PellesC x64
+    {$L 'x86_64-win64\BeaEngine.obj'}
+  {$ENDIF CPUX64} {$IFDEF CPUX86}
+    // Win32 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + BCC 10.2 bcb-win32
+    {$L 'i386-win32\BeaEngine.obj'}
+    {$WARN BAD_GLOBAL_SYMBOL OFF}
+  {$ENDIF CPUX86} {$ENDIF}
 {$ENDIF}
 
 const
+{$IFDEF MSWINDOWS}
   libc = 'msvcrt.dll';
+{$ENDIF}
+{$IFDEF MACOS}
+  libc = '/usr/lib/libc.dylib';
+{$ENDIF}
+{$IFDEF LINUX}
+  libc = 'libc.so';
+{$ENDIF}
 
-{$IFDEF BE_USE_UNDERSCORE}
+{$IFDEF BE_IMP_UNDERSCORE}
 procedure _memcpy; cdecl; external libc name 'memcpy';
 {$ELSE}
 procedure memcpy; cdecl; external libc name 'memcpy';
 {$ENDIF}
 
-{$IFDEF BE_USE_UNDERSCORE}
+{$IFDEF BE_IMP_UNDERSCORE}
 procedure _memset; cdecl; external libc name 'memset';
 {$ELSE}
 procedure memset; cdecl; external libc name 'memset';
 {$ENDIF}
 
-{$IFDEF BE_USE_UNDERSCORE}
+{$IFDEF BE_IMP_UNDERSCORE}
 procedure _strcmp; cdecl; external libc name 'strcmp';
 {$ELSE}
 procedure strcmp; cdecl; external libc name 'strcmp';
 {$ENDIF}
 
-{$IFDEF BE_USE_UNDERSCORE}
+{$IFDEF BE_IMP_UNDERSCORE}
 procedure _strcpy; cdecl; external libc name 'strcpy';
 {$ELSE}
 procedure strcpy; cdecl; external libc name 'strcpy';
 {$ENDIF}
 
-{$IFDEF BE_USE_UNDERSCORE}
+{$IFDEF BE_IMP_UNDERSCORE}
 procedure _strlen; cdecl; external libc name 'strlen';
 {$ELSE}
 procedure strlen; cdecl; external libc name 'strlen';
 {$ENDIF}
 
-{$IFDEF BE_USE_UNDERSCORE}
+{$IFDEF BE_IMP_UNDERSCORE}
 procedure _sprintf; cdecl; external libc name 'sprintf';
 {$ELSE}
 procedure sprintf; cdecl; external libc name 'sprintf';
 {$ENDIF}
 
-{$IFDEF FPC}
+{$IF DEFINED(FPC) and (DEFINED(CPUX86) or DEFINED(CPUX64))}
 
 const
-{$IFDEF BE_USE_UNDERSCORE}
+{$IFDEF BE_IMP_UNDERSCORE}
   _PREFIX = '_';
 {$ELSE}
   _PREFIX = '';
@@ -749,20 +757,20 @@ const
 
 procedure impl_strcpy; assembler; nostackframe; public name _PREFIX + 'strcpy';
 asm
-  jmp {$IFDEF BE_USE_UNDERSCORE}_strcpy{$ELSE}strcpy{$ENDIF}
+  jmp {$IFDEF BE_IMP_UNDERSCORE}_strcpy{$ELSE}strcpy{$ENDIF}
 end;
 
 procedure impl_strlen; assembler; nostackframe; public name _PREFIX + 'strlen';
 asm
-  jmp {$IFDEF BE_USE_UNDERSCORE}_strlen{$ELSE}strlen{$ENDIF}
+  jmp {$IFDEF BE_IMP_UNDERSCORE}_strlen{$ELSE}strlen{$ENDIF}
 end;
 
 procedure impl_sprintf; assembler; nostackframe; public name _PREFIX + 'sprintf';
 asm
-  jmp {$IFDEF BE_USE_UNDERSCORE}_sprintf{$ELSE}sprintf{$ENDIF}
+  jmp {$IFDEF BE_IMP_UNDERSCORE}_sprintf{$ELSE}sprintf{$ENDIF}
 end;
 
-{$ENDIF}
+{$IFEND}
 
 {$ENDIF BE_STATICLINK}
 

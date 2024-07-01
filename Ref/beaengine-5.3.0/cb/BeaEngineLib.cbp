@@ -6,6 +6,17 @@
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
+			<Target title="bcb-win32">
+				<Option output="bcb-win32/libBeaEngineLib" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="bcb-win32/" />
+				<Option type="2" />
+				<Option compiler="bcb-win32" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+			</Target>
 			<Target title="i386-win32">
 				<Option output="i386-win32/BeaEngineLib" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="" />
@@ -89,22 +100,40 @@
 					<Add option="-s" />
 				</Linker>
 			</Target>
-			<Target title="bcb-win32">
-				<Option output="bcb-win32/libBeaEngineLib" prefix_auto="1" extension_auto="1" />
+			<Target title="arm-android">
+				<Option output="arm-android/BeaEngineLib" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="" />
-				<Option object_output="bcb-win32/" />
+				<Option object_output="arm-android/" />
 				<Option type="2" />
-				<Option compiler="bcb-win32" />
+				<Option compiler="arm-linux-androideabi" />
 				<Option createDefFile="1" />
 				<Compiler>
 					<Add option="-O2" />
+					<Add option="-Wall" />
 				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+			<Target title="aarch64-android">
+				<Option output="aarch64-android/BeaEngineLib" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="aarch64-android/" />
+				<Option type="2" />
+				<Option compiler="aarch64-linux-android" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-Wall" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-DBEA_ENGINE_STATIC" />
 			<Add option="-DBEA_LACKS_SNPRINTF" />
-			<Add option="-DBEA_USE_STDCALL" />
 			<Add directory="../include" />
 		</Compiler>
 		<Unit filename="../src/BeaEngine.c">

@@ -6,7 +6,8 @@ BeaEngine is a C library designed to decode instructions from 16 bits, 32 bits a
 ## Features
 * **Supports** BeaEngine 5, x16 bits, x32 bits and x64 bits intel architectures.
 * **Supports** Delphi XE2 and greater, and FPC 3 and greater.
-* **Provides** a friendly, type-safe, and easy-to-learn API.
+* **Supports** Static libraries: i386-win32, x86_64-win64, i386-linux, x86_64-linux, aarch64-linux, x86_64-darwin, aarch64-darwin, arm-android, aarch64-android.
+* **Supports** Dynamic libraries: i386-win32, x86_64-win64, x86_64-darwin, aarch64-darwin.
 
 ## Installation
 To install the BeaEngineDelphi binding, follow these steps:

@@ -22,27 +22,9 @@
 
 unit BeaEngineDelphi;
 
+// Define BE_STATICLINK enable static library support, otherwise use dynamic link libraries.
+// Support platforms such as Windows, Linux, MacOSX, Android, etc.
 {$DEFINE BE_STATICLINK}
-
-{$IFDEF BE_STATICLINK}
-  {$IFDEF MSWINDOWS}
-    {$DEFINE BE_USE_EXTNAME}
-  {$ENDIF MSWINDOWS}
-  {$IF DEFINED(DCC) and (DEFINED(LINUX) or DEFINED(MACOS64) or DEFINED(ANDROID))}
-    {$DEFINE BE_USE_EXTLIB}
-    {$DEFINE BE_USE_EXTNAME}
-  {$IFEND}
-  {$IFDEF WIN32}
-    {$DEFINE BE_IMP_UNDERSCORE}
-  {$ENDIF WIN32}
-  {$IF DEFINED(DCC) and DEFINED(WIN32)}
-    {$DEFINE BE_EXP_UNDERSCORE}
-  {$IFEND}
-  {.$MESSAGE ERROR 'staticlink not supported'}
-{$ELSE BE_STATICLINK}
-  {$DEFINE BE_USE_EXTLIB}
-  {$DEFINE BE_USE_EXTNAME}
-{$ENDIF BE_STATICLINK}
 
 interface
 
@@ -218,9 +200,8 @@ type
     SegmentReg: UInt32;
   end;
 
-  //* reserved structure used for thread-safety */
-  //* unusable by customer */
-
+  // Reserved structure used for thread-safety.
+  // Unusable by customer.
   InternalDatas = packed record
     EIP_: UIntPtr;
     EIP_VA: UInt64;
@@ -356,13 +337,11 @@ const
   HighPosition          = 1;
 
   //* EVEX Masking */
-
   NO_MASK               = 0;
   MERGING               = 1;
   MERGING_ZEROING       = 2;
 
   //* EVEX Compressed Displacement */
-
   FULL                  = 1;
   HALF                  = 2;
   FULL_MEM              = 3;
@@ -646,8 +625,30 @@ function BufferToHex(const AData: Pointer; ALen: Integer): string;
 
 implementation
 
+// Define import and export function behavior.
+{$IFDEF BE_STATICLINK}
+  {$IFDEF MSWINDOWS}
+    {$DEFINE BE_USE_EXTNAME}
+  {$ENDIF MSWINDOWS}
+  {$IF DEFINED(DCC) and (DEFINED(LINUX) or DEFINED(MACOS64) or DEFINED(ANDROID))}
+    {$DEFINE BE_USE_EXTLIB}
+    {$DEFINE BE_USE_EXTNAME}
+  {$IFEND}
+  {$IFDEF WIN32}
+    {$DEFINE BE_IMP_UNDERSCORE}
+  {$ENDIF WIN32}
+  {$IF DEFINED(DCC) and DEFINED(WIN32)}
+    {$DEFINE BE_EXP_UNDERSCORE}
+  {$IFEND}
+  {.$MESSAGE ERROR 'staticlink not supported'}
+{$ELSE BE_STATICLINK}
+  {$DEFINE BE_USE_EXTLIB}
+  {$DEFINE BE_USE_EXTNAME}
+{$ENDIF BE_STATICLINK}
+
 {$IFDEF BE_STATICLINK}
 
+// Link static libraries.
 {$IFDEF FPC}
   {$IFDEF MSWINDOWS} {$IFDEF CPUX64}
     // Win64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + TDM-GCC-64 9.2.0 x86_64-win64
@@ -690,6 +691,7 @@ implementation
   {$ENDIF} {$ENDIF}
 {$ENDIF FPC}
 
+// Link static library dependency functions.
 const
 {$IFDEF MSWINDOWS}
   libc = 'msvcrt.dll';
@@ -765,6 +767,7 @@ end;
 
 {$ENDIF BE_STATICLINK}
 
+// Link static or dynamic libraries.
 const
 {$IFDEF BE_STATICLINK}
   {$IFDEF LINUX} {$IFDEF CPUX64}

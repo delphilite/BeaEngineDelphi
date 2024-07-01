@@ -14,7 +14,7 @@
   {$MODE DELPHI}
   {$WARNINGS OFF}
   {$HINTS OFF}
-{$ENDIF}
+{$ENDIF FPC}
 
 {$ALIGN ON}
 {$MINENUMSIZE 4}
@@ -22,29 +22,27 @@
 
 unit BeaEngineDelphi;
 
-{.$DEFINE BE_STATICLINK}
+{$DEFINE BE_STATICLINK}
 
 {$IFDEF BE_STATICLINK}
   {$IFDEF MSWINDOWS}
     {$DEFINE BE_USE_EXTNAME}
-  {$ENDIF}
-  {$IFDEF LINUX}
-    {.$DEFINE BE_USE_EXTNAME}
-  {$ENDIF}
+  {$ENDIF MSWINDOWS}
+  {$IF DEFINED(DCC) and (DEFINED(LINUX) or DEFINED(MACOS64) or DEFINED(ANDROID))}
+    {$DEFINE BE_USE_EXTLIB}
+    {$DEFINE BE_USE_EXTNAME}
+  {$IFEND}
+  {$IFDEF WIN32}
+    {$DEFINE BE_IMP_UNDERSCORE}
+  {$ENDIF WIN32}
+  {$IF DEFINED(DCC) and DEFINED(WIN32)}
+    {$DEFINE BE_EXP_UNDERSCORE}
+  {$IFEND}
   {.$MESSAGE ERROR 'staticlink not supported'}
-{$ELSE}
+{$ELSE BE_STATICLINK}
   {$DEFINE BE_USE_EXTLIB}
   {$DEFINE BE_USE_EXTNAME}
-{$ENDIF}
-
-{$IF DEFINED(MSWINDOWS) and DEFINED(CPUX86)}
-  {$IFDEF DELPHI}
-    {.$DEFINE BE_EXP_UNDERSCORE} { for bcb omf object file }
-  {$ELSE}
-    {$DEFINE BE_EXP_UNDERSCORE}
-  {$ENDIF}
-  {$DEFINE BE_IMP_UNDERSCORE}
-{$IFEND}
+{$ENDIF BE_STATICLINK}
 
 interface
 
@@ -607,63 +605,43 @@ const
 const
   OPCODE_RET            = $C3;
 
-const
-{$IFDEF MSWINDOWS}
-  // Win32 from Ref\beaengine-5.3.0\CMakeLists.txt -> VS19\BeaEngine_d_l_stdcall.vcxproj + VC-LTL 5
-  // Win64 from Ref\beaengine-5.3.0\dll_x64\BeaEngine.dll
-  BeaEngineLib   = 'BeaEngine.dll';
-{$ENDIF}
-{$IFDEF LINUX}
-  BeaEngineLib   = 'libBeaEngine.so';
-{$ENDIF}
-{$IFDEF MACOS}
-  {$IF DEFINED(IOS) or DEFINED(MACOS64)}
-  BeaEngineLib   = '/usr/lib/libBeaEngine.dylib';
-  {$ELSE}
-  BeaEngineLib   = 'libBeaEngine.dylib';
-  {$IFEND}
-{$ENDIF}
-{$IF DEFINED(FPC) and DEFINED(DARWIN)}
-  BeaEngineLib   = 'libBeaEngine.dylib';
-  {$LINKLIB libBeaEngine}
-{$IFEND}
-{$IFDEF ANDROID}
-  BeaEngineLib   = 'libBeaEngine.so';
-{$ENDIF}
-
-const
-{$IFDEF BE_EXP_UNDERSCORE}
-  BeaEngineRevisionName = '_BeaEngineRevision@0';
-  BeaEngineVersionName  = '_BeaEngineVersion@0';
-  DisasmName            = '_Disasm@4';
-{$ELSE}
-  BeaEngineRevisionName = 'BeaEngineRevision';
-  BeaEngineVersionName  = 'BeaEngineVersion';
-  DisasmName            = 'Disasm';
-{$ENDIF}
-
 // The Disasm function disassembles one instruction from the Intel ISA. It makes a precise
 // analysis of the focused instruction and sends back a complete structure that is usable
 // to make data-flow and control-flow studies.
 // Parameters
-// infos: Pointer to a structure PDISASM
+// aDisAsm: Pointer to a structure PDISASM
 // Return
 // The function may sends you back 3 values. if the analyzed bytes sequence is an invalid
 // opcode, it sends back UNKNOWN_OPCODE (-1). If it tried to read a byte located outside
 // the Security Block, it sends back OUT_OF_BLOCK (-2). In others cases, it sends back
 // the instruction length. Thus, you can use it as a LDE. To have a detailed status,
 // use infos.Error field.
-function Disasm(var aDisAsm: TDisasm): LongInt; stdcall;
-  external {$IFDEF BE_USE_EXTLIB}BeaEngineLib{$ENDIF} {$IFDEF BE_USE_EXTNAME}name DisasmName{$ENDIF};
+function Disasm(var aDisAsm: TDisasm): LongInt; cdecl;
 
-function BeaEngineVersion: PAnsiChar; stdcall;
-  external {$IFDEF BE_USE_EXTLIB}BeaEngineLib{$ENDIF} {$IFDEF BE_USE_EXTNAME}name BeaEngineVersionName{$ENDIF};
+// The BeaEngineVersion function retrieves the version information of the BeaEngine library.
+// Return
+// The function returns a pointer to an AnsiChar string containing the version information of the BeaEngine library.
+function BeaEngineVersion: PAnsiChar; cdecl;
 
-function BeaEngineRevision: PAnsiChar; stdcall;
-  external {$IFDEF BE_USE_EXTLIB}BeaEngineLib{$ENDIF} {$IFDEF BE_USE_EXTNAME}name BeaEngineRevisionName{$ENDIF};
+// The BeaEngineRevision function retrieves the revision information of the BeaEngine library.
+// Return
+// The function returns a pointer to an AnsiChar string containing the revision information of the BeaEngine library.
+function BeaEngineRevision: PAnsiChar; cdecl;
 
-function BeaEngineVersionInfo: string; stdcall;
+// The BeaEngineVersionInfo function retrieves the full version information of the BeaEngine library,
+// including the version number, revision, and CPU architecture.
+// Return
+// The function returns a string containing the full version information of the BeaEngine library.
+// The format is "v<version> (Rev<revision>,<architecture>)", where <architecture> is x64 or x32
+// depending on the CPU architecture.
+function BeaEngineVersionInfo: string;
 
+// The BufferToHex function converts a buffer of binary data into its hexadecimal string representation.
+// Parameters
+// AData: Pointer to the binary data buffer.
+// ALen: Integer specifying the length of the binary data buffer.
+// Return
+// The function returns a string that represents the hexadecimal equivalent of the binary data.
 function BufferToHex(const AData: Pointer; ALen: Integer): string;
 
 implementation
@@ -674,41 +652,54 @@ implementation
   {$IFDEF MSWINDOWS} {$IFDEF CPUX64}
     // Win64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + TDM-GCC-64 9.2.0 x86_64-win64
     {$L 'x86_64-win64\BeaEngine.o'}
-  {$ENDIF CPUX64} {$IFDEF CPUX86}
+  {$ENDIF} {$IFDEF CPUX86}
     // Win32 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + TDM-GCC-64 9.2.0 i386-win32
     {$L 'i386-win32\BeaEngine.o'}
-  {$ENDIF CPUX86} {$ENDIF}
+  {$ENDIF} {$ENDIF}
   {$IFDEF LINUX} {$IFDEF CPUX64}
     // Linux64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 14.0 x86_64-linux
     {$L 'x86_64-linux\BeaEngine.o'}
-  {$ENDIF CPUX64} {$IFDEF CPUX86}
+  {$ENDIF} {$IFDEF CPUX86}
     // Linux32 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 14.0 i386-linux
     {$L 'i386-linux\BeaEngine.o'}
-  {$ENDIF CPUX86} {$IFDEF CPUAARCH64}
+  {$ENDIF} {$IFDEF CPUAARCH64}
     // Linux64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 14.0 aarch64-linux
     {$L 'aarch64-linux\BeaEngine.o'}
-  {$ENDIF CPUAARCH64} {$ENDIF}
-{$ELSE}
+  {$ENDIF} {$ENDIF}
+  {$IFDEF DARWIN} {$IFDEF CPUX64}
+    // MacOS ARM64 from Ref\beaengine-5.3.0\xcode\BeaEngine.xcodeproj + $(ARCHS_STANDARD)
+    {$L 'x86_64-darwin\BeaEngine.o'}
+  {$ENDIF} {$IFDEF CPUAARCH64}
+    // MacOS AMD64 from Ref\beaengine-5.3.0\xcode\BeaEngine.xcodeproj + $(ARCHS_STANDARD)
+    {$L 'aarch64-darwin\BeaEngine.o'}
+  {$ENDIF} {$ENDIF}
+  {$IFDEF ANDROID} {$IFDEF CPUARM64}
+    // Android ARM64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 12.0 aarch64-linux-android
+    {$L 'aarch64-android\BeaEngine.o'}
+  {$ENDIF} {$IFDEF CPUARM32}
+    // Android ARM32 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 11.0 arm-linux-androideabi
+    {$L 'arm-android\BeaEngine.o'}
+  {$ENDIF} {$ENDIF}
+{$ELSE FPC}
   {$IFDEF MSWINDOWS} {$IFDEF CPUX64}
     // Win64 from Ref\beaengine-5.3.0\lib_static_x64\BeaEngine.lib, PellesC x64
     {$L 'x86_64-win64\BeaEngine.obj'}
-  {$ENDIF CPUX64} {$IFDEF CPUX86}
+  {$ENDIF} {$IFDEF CPUX86}
     // Win32 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + BCC 10.2 bcb-win32
     {$L 'i386-win32\BeaEngine.obj'}
-    {$WARN BAD_GLOBAL_SYMBOL OFF}
-  {$ENDIF CPUX86} {$ENDIF}
-{$ENDIF}
+  {$ENDIF} {$ENDIF}
+{$ENDIF FPC}
 
 const
 {$IFDEF MSWINDOWS}
   libc = 'msvcrt.dll';
-{$ENDIF}
-{$IFDEF MACOS}
-  libc = '/usr/lib/libc.dylib';
-{$ENDIF}
-{$IFDEF LINUX}
+{$ENDIF MSWINDOWS}
+{$IF DEFINED(ANDROID) or DEFINED(LINUX)}
   libc = 'libc.so';
-{$ENDIF}
+{$IFEND}
+{$IF DEFINED(DARWIN) or DEFINED(MACOS)}
+  libc = '/usr/lib/libc.dylib';
+{$IFEND}
 
 {$IFDEF BE_IMP_UNDERSCORE}
 procedure _memcpy; cdecl; external libc name 'memcpy';
@@ -753,7 +744,7 @@ const
   _PREFIX = '_';
 {$ELSE}
   _PREFIX = '';
-{$ENDIF CPU64}
+{$ENDIF}
 
 procedure impl_strcpy; assembler; nostackframe; public name _PREFIX + 'strcpy';
 asm
@@ -773,6 +764,70 @@ end;
 {$IFEND}
 
 {$ENDIF BE_STATICLINK}
+
+const
+{$IFDEF BE_STATICLINK}
+  {$IFDEF LINUX} {$IFDEF CPUX64}
+  // Linux64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 14.0 x86_64-linux
+  BeaEngineLib   = 'x86_64-linux\BeaEngine.o';
+  {$ENDIF} {$IFDEF CPUAARCH64}
+  // Linux64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 14.0 aarch64-linux
+  BeaEngineLib   = 'aarch64-linux\BeaEngine.o';
+  {$ENDIF} {$ENDIF}
+  {$IFDEF MACOS} {$IFDEF CPUX64}
+  // MacOS ARM64 from Ref\beaengine-5.3.0\xcode\BeaEngine.xcodeproj + $(ARCHS_STANDARD)
+  BeaEngineLib   = 'x86_64-darwin\BeaEngine.o';
+  {$ENDIF} {$IFDEF CPUARM64}
+  // MacOS AMD64 from Ref\beaengine-5.3.0\xcode\BeaEngine.xcodeproj + $(ARCHS_STANDARD)
+  BeaEngineLib   = 'aarch64-darwin\BeaEngine.o';
+  {$ENDIF} {$ENDIF}
+  {$IFDEF ANDROID} {$IFDEF CPUARM64}
+  // Android ARM64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 12.0 aarch64-linux-android
+  BeaEngineLib   = 'aarch64-android\BeaEngine.o';
+  {$ENDIF} {$IFDEF CPUARM32}
+  // Android ARM32 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 11.0 arm-linux-androideabi
+  BeaEngineLib   = 'arm-android\BeaEngine.o';
+  {$ENDIF} {$ENDIF}
+{$ELSE BE_STATICLINK}
+  {$IFDEF MSWINDOWS}
+  // Win32 from Ref\beaengine-5.3.0\CMakeLists.txt -> VS19\BeaEngine_d_l_stdcall.vcxproj + VC-LTL 5
+  // Win64 from Ref\beaengine-5.3.0\dll_x64\BeaEngine.dll
+  BeaEngineLib   = 'BeaEngine.dll';
+  {$ENDIF}
+  {$IFDEF LINUX}
+  BeaEngineLib   = 'libBeaEngine.so';
+  {$ENDIF}
+  {$IFDEF MACOS}
+    {$IF DEFINED(IOS) or DEFINED(MACOS64)}
+  BeaEngineLib   = '/usr/lib/libBeaEngine.dylib';
+    {$ELSE}
+  BeaEngineLib   = 'libBeaEngine.dylib';
+    {$IFEND}
+  {$ENDIF}
+  {$IF DEFINED(FPC) and DEFINED(DARWIN)}
+  BeaEngineLib   = 'libBeaEngine.dylib';
+  {$LINKLIB libBeaEngine}
+  {$IFEND}
+  {$IFDEF ANDROID}
+  BeaEngineLib   = 'libBeaEngine.so';
+  {$ENDIF}
+{$ENDIF BE_STATICLINK}
+
+{$IFDEF BE_EXP_UNDERSCORE}
+  BeaEngineRevisionName = '_BeaEngineRevision';
+  BeaEngineVersionName  = '_BeaEngineVersion';
+  DisasmName            = '_Disasm';
+{$ELSE BE_EXP_UNDERSCORE}
+  BeaEngineRevisionName = 'BeaEngineRevision';
+  BeaEngineVersionName  = 'BeaEngineVersion';
+  DisasmName            = 'Disasm';
+{$ENDIF BE_EXP_UNDERSCORE}
+
+function Disasm; external {$IFDEF BE_USE_EXTLIB}BeaEngineLib{$ENDIF} {$IFDEF BE_USE_EXTNAME}name DisasmName{$ENDIF};
+
+function BeaEngineVersion; external {$IFDEF BE_USE_EXTLIB}BeaEngineLib{$ENDIF} {$IFDEF BE_USE_EXTNAME}name BeaEngineVersionName{$ENDIF};
+
+function BeaEngineRevision; external {$IFDEF BE_USE_EXTLIB}BeaEngineLib{$ENDIF} {$IFDEF BE_USE_EXTNAME}name BeaEngineRevisionName{$ENDIF};
 
 function BeaEngineVersionInfo: string;
 begin

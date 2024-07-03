@@ -670,7 +670,7 @@ implementation
     // Linux ARM32 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 4.9.4 arm-linux-gnueabihf-gcc, Using hard floating-point (VFP), -mfloat-abi=hard -mfpu=vfpv3-d16
     {$L 'arm-linux\BeaEngine.o'}
   {$ENDIF} {$IFDEF CPULOONGARCH64}
-    // Linux LoongArch64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 14.0 loongarch64-linux-gnu
+    // Linux LoongArch64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 8.3.0 loongarch64-newlib-elf
     {$L 'loongarch64-linux\BeaEngine.o'}
   {$ENDIF} {$ENDIF}
   {$IFDEF DARWIN} {$IFDEF CPUX64}

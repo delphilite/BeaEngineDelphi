@@ -61,6 +61,8 @@
 				<Compiler>
 					<Add option="-O2" />
 					<Add option="-Wall" />
+					<Add option="-mfloat-abi=hard" />
+					<Add option="-mfpu=vfpv3-d16" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -111,6 +113,21 @@
 					<Add option="-m32" />
 				</Linker>
 			</Target>
+			<Target title="loongarch64-linux">
+				<Option output="loongarch64-linux/BeaEngineLib" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="loongarch64-linux/" />
+				<Option type="2" />
+				<Option compiler="loongarch64-linux-gnu" />
+				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-O2" />
+					<Add option="-Wall" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
 			<Target title="x86_64-linux">
 				<Option output="x86_64-linux/BeaEngineLib" prefix_auto="1" extension_auto="1" />
 				<Option working_dir="" />
@@ -147,7 +164,7 @@
 			</Target>
 		</Build>
 		<VirtualTargets>
-			<Add alias="all" targets="aarch64-android;aarch64-linux;arm-android;arm-linux;bcb-win32;i386-linux;i386-win32;x86_64-linux;x86_64-win64;" />
+			<Add alias="all" targets="aarch64-android;aarch64-linux;arm-android;arm-linux;bcb-win32;i386-linux;i386-win32;loongarch64-linux;x86_64-linux;x86_64-win64;" />
 		</VirtualTargets>
 		<Compiler>
 			<Add option="-DBEA_ENGINE_STATIC" />

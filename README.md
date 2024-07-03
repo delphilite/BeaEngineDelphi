@@ -6,7 +6,7 @@ BeaEngine is a C library designed to decode instructions from 16 bits, 32 bits a
 ## Features
 * **Supports** BeaEngine 5, x16 bits, x32 bits and x64 bits intel architectures.
 * **Supports** Delphi XE2 and greater, and FPC 3 and greater.
-* **Supports** Static libraries: i386-win32, x86_64-win64, i386-linux, x86_64-linux, aarch64-linux, x86_64-darwin, aarch64-darwin, arm-android, aarch64-android.
+* **Supports** Static libraries: i386-win32, x86_64-win64, i386-linux, x86_64-linux, arm-linux, aarch64-linux, x86_64-darwin, aarch64-darwin, arm-android, aarch64-android, loongarch64-linux.
 * **Supports** Dynamic libraries: i386-win32, x86_64-win64, x86_64-darwin, aarch64-darwin.
 
 ## Installation
@@ -36,9 +36,9 @@ begin
   FillChar(aDisasm, SizeOf(TDISASM), 0);
   aDisasm.EIP := UIntPtr(AFunc);
 {$IFDEF CPUX64}
-  aDisasm.Archi := 64;
+  aDisasm.Archi := ARCHI_X64;
 {$ELSE}
-  aDisasm.Archi := 0;
+  aDisasm.Archi := ARCHI_X32;
 {$ENDIF}
   aDisasm.Options := NoTabulation + MasmSyntax;
   pData := PByte(AFunc);
@@ -49,19 +49,19 @@ begin
     Writeln(S);
     aDisasm.EIP := aDisasm.EIP + nLen;
     Inc(pData, nLen);
-  until (aDisasm.Instruction.Opcode = $C3) or (nLen <= 0);
+  until (aDisasm.Instruction.Opcode = OPCODE_RET) or (nLen <= 0);
 end;
 
 begin
   try
-    WriteLn(Format('BeaEngine: %s, DisAsm ExpandFileNameCase ...', [BeaEngineVersionInfo]));
+    WriteLn('BeaEngine: ', BeaEngineVersionInfo, ', DisAsm ExpandFileNameCase ...');
     WriteLn('');
     DisAsmFunctionCode(@SysUtils.ExpandFileNameCase);
     WriteLn('');
     WriteLn('Done.');
   except
     on E: Exception do
-      WriteLn(Format('Error Decompiler: %s', [E.Message]));
+      WriteLn('Error Decompiler: ', E.Message);
   end;
   ReadLn;
 end.

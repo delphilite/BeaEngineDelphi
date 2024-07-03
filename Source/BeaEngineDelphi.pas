@@ -664,20 +664,26 @@ implementation
     // Linux32 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 14.0 i386-linux
     {$L 'i386-linux\BeaEngine.o'}
   {$ENDIF} {$IFDEF CPUAARCH64}
-    // Linux64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 14.0 aarch64-linux
+    // Linux ARM64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 13.0 aarch64-linux-gnu-gcc
     {$L 'aarch64-linux\BeaEngine.o'}
+  {$ENDIF} {$IFDEF CPUARM}
+    // Linux ARM32 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 4.9.4 arm-linux-gnueabihf-gcc, Using hard floating-point (VFP), -mfloat-abi=hard -mfpu=vfpv3-d16
+    {$L 'arm-linux\BeaEngine.o'}
+  {$ENDIF} {$IFDEF CPULOONGARCH64}
+    // Linux LoongArch64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 14.0 loongarch64-linux-gnu
+    {$L 'loongarch64-linux\BeaEngine.o'}
   {$ENDIF} {$ENDIF}
   {$IFDEF DARWIN} {$IFDEF CPUX64}
-    // MacOS ARM64 from Ref\beaengine-5.3.0\xcode\BeaEngine.xcodeproj + $(ARCHS_STANDARD)
+    // MacOS AMD64 from Ref\beaengine-5.3.0\xcode\BeaEngine.xcodeproj + $(ARCHS_STANDARD)
     {$L 'x86_64-darwin\BeaEngine.o'}
   {$ENDIF} {$IFDEF CPUAARCH64}
-    // MacOS AMD64 from Ref\beaengine-5.3.0\xcode\BeaEngine.xcodeproj + $(ARCHS_STANDARD)
+    // MacOS ARM64 from Ref\beaengine-5.3.0\xcode\BeaEngine.xcodeproj + $(ARCHS_STANDARD)
     {$L 'aarch64-darwin\BeaEngine.o'}
   {$ENDIF} {$ENDIF}
-  {$IFDEF ANDROID} {$IFDEF CPUARM64}
+  {$IFDEF ANDROID} {$IFDEF CPUAARCH64}
     // Android ARM64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 12.0 aarch64-linux-android
     {$L 'aarch64-android\BeaEngine.o'}
-  {$ENDIF} {$IFDEF CPUARM32}
+  {$ENDIF} {$IFDEF CPUARM}
     // Android ARM32 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 11.0 arm-linux-androideabi
     {$L 'arm-android\BeaEngine.o'}
   {$ENDIF} {$ENDIF}
@@ -703,43 +709,28 @@ const
   libc = '/usr/lib/libc.dylib';
 {$IFEND}
 
-{$IFDEF BE_IMP_UNDERSCORE}
-procedure _memcpy; cdecl; external libc name 'memcpy';
-{$ELSE}
-procedure memcpy; cdecl; external libc name 'memcpy';
-{$ENDIF}
+procedure {$IFDEF BE_IMP_UNDERSCORE}_memcpy{$ELSE}memcpy{$ENDIF}; cdecl;
+  external libc name 'memcpy';
 
-{$IFDEF BE_IMP_UNDERSCORE}
-procedure _memset; cdecl; external libc name 'memset';
-{$ELSE}
-procedure memset; cdecl; external libc name 'memset';
-{$ENDIF}
+procedure {$IFDEF BE_IMP_UNDERSCORE}_memset{$ELSE}memset{$ENDIF}; cdecl;
+  external libc name 'memset';
 
-{$IFDEF BE_IMP_UNDERSCORE}
-procedure _strcmp; cdecl; external libc name 'strcmp';
-{$ELSE}
-procedure strcmp; cdecl; external libc name 'strcmp';
-{$ENDIF}
+procedure {$IFDEF BE_IMP_UNDERSCORE}_sprintf{$ELSE}sprintf{$ENDIF}; cdecl;
+  external libc name 'sprintf';
 
-{$IFDEF BE_IMP_UNDERSCORE}
-procedure _strcpy; cdecl; external libc name 'strcpy';
-{$ELSE}
-procedure strcpy; cdecl; external libc name 'strcpy';
-{$ENDIF}
+procedure {$IFDEF BE_IMP_UNDERSCORE}_strcmp{$ELSE}strcmp{$ENDIF}; cdecl;
+  external libc name 'strcmp';
 
-{$IFDEF BE_IMP_UNDERSCORE}
-procedure _strlen; cdecl; external libc name 'strlen';
-{$ELSE}
-procedure strlen; cdecl; external libc name 'strlen';
-{$ENDIF}
+function {$IFDEF BE_IMP_UNDERSCORE}_strcpy{$ELSE}strcpy{$ENDIF}(dest, src: PAnsiChar): PAnsiChar; cdecl;
+  external libc name 'strcpy';
 
-{$IFDEF BE_IMP_UNDERSCORE}
-procedure _sprintf; cdecl; external libc name 'sprintf';
-{$ELSE}
-procedure sprintf; cdecl; external libc name 'sprintf';
-{$ENDIF}
+function {$IFDEF BE_IMP_UNDERSCORE}_strlen{$ELSE}strlen{$ENDIF}(s: PAnsiChar): NativeUInt; cdecl;
+  external libc name 'strlen';
 
-{$IF DEFINED(FPC) and (DEFINED(CPUX86) or DEFINED(CPUX64))}
+function {$IFDEF BE_IMP_UNDERSCORE}_stpcpy{$ELSE}stpcpy{$ENDIF}(dest, src: PAnsiChar): PAnsiChar; cdecl;
+  external libc name 'stpcpy';
+
+{$IFDEF FPC}
 
 const
 {$IFDEF BE_IMP_UNDERSCORE}
@@ -748,19 +739,26 @@ const
   _PREFIX = '';
 {$ENDIF}
 
-procedure impl_strcpy; assembler; nostackframe; public name _PREFIX + 'strcpy';
-asm
-  jmp {$IFDEF BE_IMP_UNDERSCORE}_strcpy{$ELSE}strcpy{$ENDIF}
-end;
-
-procedure impl_strlen; assembler; nostackframe; public name _PREFIX + 'strlen';
-asm
-  jmp {$IFDEF BE_IMP_UNDERSCORE}_strlen{$ELSE}strlen{$ENDIF}
-end;
-
+{$IF (DEFINED(CPUX86) or DEFINED(CPUX64))}
 procedure impl_sprintf; assembler; nostackframe; public name _PREFIX + 'sprintf';
 asm
   jmp {$IFDEF BE_IMP_UNDERSCORE}_sprintf{$ELSE}sprintf{$ENDIF}
+end;
+{$IFEND}
+
+function impl_strcpy(dest, src: PAnsiChar): PAnsiChar; cdecl; public name _PREFIX + 'strcpy';
+begin
+  Result := {$IFDEF BE_IMP_UNDERSCORE}_strcpy{$ELSE}strcpy{$ENDIF}(dest, src);
+end;
+
+function impl_strlen(s: PAnsiChar): NativeUInt; cdecl; public name _PREFIX + 'strlen';
+begin
+  Result := {$IFDEF BE_IMP_UNDERSCORE}_strlen{$ELSE}strlen{$ENDIF}(s);
+end;
+
+function impl_stpcpy(dest, src: PAnsiChar): PAnsiChar; cdecl; public name _PREFIX + 'stpcpy';
+begin
+  Result := {$IFDEF BE_IMP_UNDERSCORE}_stpcpy{$ELSE}stpcpy{$ENDIF}(dest, src);
 end;
 
 {$IFEND}

@@ -16,6 +16,39 @@
     </General>
     <BuildModes>
       <Item Name="Default" Default="True"/>
+      <Item Name="aarch64-android">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="..\..\Lib\$(TargetCPU)-$(TargetOS)\Demo"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <Libraries Value="..\..\Lib\$(TargetCPU)-$(TargetOS)"/>
+            <OtherUnitFiles Value="..\..\Source"/>
+            <UnitOutputDirectory Value="..\..\Dcu\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="aarch64"/>
+            <TargetOS Value="android"/>
+            <Optimizations>
+              <OptimizationLevel Value="3"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <RunWithoutDebug Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-k&quot;-rpath $ORIGIN&quot;"/>
+          </Other>
+        </CompilerOptions>
+      </Item>
       <Item Name="aarch64-darwin">
         <CompilerOptions>
           <Version Value="11"/>
@@ -82,6 +115,66 @@
           </Other>
         </CompilerOptions>
       </Item>
+      <Item Name="arm-android">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="..\..\Lib\$(TargetCPU)-$(TargetOS)\Demo"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <Libraries Value="..\..\Lib\$(TargetCPU)-$(TargetOS)"/>
+            <OtherUnitFiles Value="..\..\Source"/>
+            <UnitOutputDirectory Value="..\..\Dcu\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="arm"/>
+            <TargetOS Value="android"/>
+            <Optimizations>
+              <OptimizationLevel Value="3"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <RunWithoutDebug Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
+        </CompilerOptions>
+      </Item>
+      <Item Name="arm-linux">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="..\..\Lib\$(TargetCPU)-$(TargetOS)\Demo"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <Libraries Value="..\..\Lib\$(TargetCPU)-$(TargetOS)"/>
+            <OtherUnitFiles Value="..\..\Source"/>
+            <UnitOutputDirectory Value="..\..\Dcu\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="arm"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="3"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <RunWithoutDebug Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
+        </CompilerOptions>
+      </Item>
       <Item Name="i386-linux">
         <CompilerOptions>
           <Version Value="11"/>
@@ -140,6 +233,39 @@
             </Debugging>
             <LinkSmart Value="True"/>
           </Linking>
+        </CompilerOptions>
+      </Item>
+      <Item Name="loongarch64-linux">
+        <CompilerOptions>
+          <Version Value="11"/>
+          <PathDelim Value="\"/>
+          <Target>
+            <Filename Value="..\..\Lib\$(TargetCPU)-$(TargetOS)\Demo"/>
+          </Target>
+          <SearchPaths>
+            <IncludeFiles Value="$(ProjOutDir)"/>
+            <Libraries Value="..\..\Lib\$(TargetCPU)-$(TargetOS)"/>
+            <OtherUnitFiles Value="..\..\Source"/>
+            <UnitOutputDirectory Value="..\..\Dcu\$(TargetCPU)-$(TargetOS)"/>
+          </SearchPaths>
+          <CodeGeneration>
+            <SmartLinkUnit Value="True"/>
+            <TargetCPU Value="loongarch64"/>
+            <TargetOS Value="linux"/>
+            <Optimizations>
+              <OptimizationLevel Value="3"/>
+            </Optimizations>
+          </CodeGeneration>
+          <Linking>
+            <Debugging>
+              <GenerateDebugInfo Value="False"/>
+              <RunWithoutDebug Value="True"/>
+            </Debugging>
+            <LinkSmart Value="True"/>
+          </Linking>
+          <Other>
+            <CustomOptions Value="-k&quot;-rpath $ORIGIN&quot;"/>
+          </Other>
         </CompilerOptions>
       </Item>
       <Item Name="x86_64-darwin">

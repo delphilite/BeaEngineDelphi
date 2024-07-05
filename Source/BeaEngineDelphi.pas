@@ -658,26 +658,26 @@ implementation
     {$L 'i386-win32\BeaEngine.o'}
   {$ENDIF} {$ENDIF}
   {$IFDEF LINUX} {$IFDEF CPUX64}
-    // Linux64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 14.0 x86_64-linux
+    // Linux64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 14.0 x86_64-pc-linux-gnu
     {$L 'x86_64-linux\BeaEngine.o'}
   {$ENDIF} {$IFDEF CPUX86}
-    // Linux32 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 14.0 i386-linux
+    // Linux32 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 14.0 x86_64-pc-linux-gnu
     {$L 'i386-linux\BeaEngine.o'}
   {$ENDIF} {$IFDEF CPUAARCH64}
-    // Linux ARM64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 13.0 aarch64-linux-gnu-gcc
+    // Linux ARM64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 13.0 aarch64-linux-gnu
     {$L 'aarch64-linux\BeaEngine.o'}
   {$ENDIF} {$IFDEF CPUARM}
-    // Linux ARM32 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 4.9.4 arm-linux-gnueabihf-gcc, Using hard floating-point (VFP), -mfloat-abi=hard -mfpu=vfpv3-d16
+    // Linux ARM32 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 4.9 arm-linux-gnueabihf-gcc, Using hard floating-point (VFP), -mfloat-abi=hard -mfpu=vfpv3-d16
     {$L 'arm-linux\BeaEngine.o'}
   {$ENDIF} {$IFDEF CPULOONGARCH64}
-    // Linux LoongArch64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 8.3.0 loongarch64-newlib-elf
+    // Linux LoongArch64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 8.3 loongarch64-newlib-elf
     {$L 'loongarch64-linux\BeaEngine.o'}
   {$ENDIF} {$ENDIF}
   {$IFDEF DARWIN} {$IFDEF CPUX64}
-    // MacOS AMD64 from Ref\beaengine-5.3.0\xcode\BeaEngine.xcodeproj + $(ARCHS_STANDARD)
+    // MacOS AMD64 from Ref\beaengine-5.3.0\xcode\BeaEngine.xcodeproj + XCode 14 $(ARCHS_STANDARD)
     {$L 'x86_64-darwin\BeaEngine.o'}
   {$ENDIF} {$IFDEF CPUAARCH64}
-    // MacOS ARM64 from Ref\beaengine-5.3.0\xcode\BeaEngine.xcodeproj + $(ARCHS_STANDARD)
+    // MacOS ARM64 from Ref\beaengine-5.3.0\xcode\BeaEngine.xcodeproj + XCode 14 $(ARCHS_STANDARD)
     {$L 'aarch64-darwin\BeaEngine.o'}
   {$ENDIF} {$ENDIF}
   {$IFDEF ANDROID} {$IFDEF CPUAARCH64}
@@ -761,7 +761,7 @@ begin
   Result := {$IFDEF BE_IMP_UNDERSCORE}_stpcpy{$ELSE}stpcpy{$ENDIF}(dest, src);
 end;
 
-{$IFEND}
+{$ENDIF}
 
 {$ENDIF BE_STATICLINK}
 
@@ -769,17 +769,17 @@ end;
 const
 {$IFDEF BE_STATICLINK}
   {$IFDEF LINUX} {$IFDEF CPUX64}
-  // Linux64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 14.0 x86_64-linux
+  // Linux AMD64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 14.0 x86_64-pc-linux-gnu
   BeaEngineLib   = 'x86_64-linux\BeaEngine.o';
   {$ENDIF} {$IFDEF CPUAARCH64}
-  // Linux64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 14.0 aarch64-linux
+  // Linux ARM64 from Ref\beaengine-5.3.0\cb\BeaEngineLib.cbp + GCC-CROSS 13.0 aarch64-linux-gnu
   BeaEngineLib   = 'aarch64-linux\BeaEngine.o';
   {$ENDIF} {$ENDIF}
   {$IFDEF MACOS} {$IFDEF CPUX64}
-  // MacOS ARM64 from Ref\beaengine-5.3.0\xcode\BeaEngine.xcodeproj + $(ARCHS_STANDARD)
+  // MacOS AMD64 from Ref\beaengine-5.3.0\xcode\BeaEngine.xcodeproj + XCode 14 $(ARCHS_STANDARD)
   BeaEngineLib   = 'x86_64-darwin\BeaEngine.o';
   {$ENDIF} {$IFDEF CPUARM64}
-  // MacOS AMD64 from Ref\beaengine-5.3.0\xcode\BeaEngine.xcodeproj + $(ARCHS_STANDARD)
+  // MacOS ARM64 from Ref\beaengine-5.3.0\xcode\BeaEngine.xcodeproj + XCode 14 $(ARCHS_STANDARD)
   BeaEngineLib   = 'aarch64-darwin\BeaEngine.o';
   {$ENDIF} {$ENDIF}
   {$IFDEF ANDROID} {$IFDEF CPUARM64}
@@ -791,27 +791,22 @@ const
   {$ENDIF} {$ENDIF}
 {$ELSE BE_STATICLINK}
   {$IFDEF MSWINDOWS}
-  // Win32 from Ref\beaengine-5.3.0\CMakeLists.txt -> VS19\BeaEngine_d_l_stdcall.vcxproj + VC-LTL 5
+  // Win32 from Ref\beaengine-5.3.0\msvc\BeaEngine.sln + VS19 + VC-LTL 5
   // Win64 from Ref\beaengine-5.3.0\dll_x64\BeaEngine.dll
   BeaEngineLib   = 'BeaEngine.dll';
   {$ENDIF}
-  {$IFDEF LINUX}
+  {$IF DEFINED(LINUX) or DEFINED(ANDROID)}
+  // Linux, Android from Ref\beaengine-5.3.0\CMakeLists.txt + make
   BeaEngineLib   = 'libBeaEngine.so';
-  {$ENDIF}
-  {$IFDEF MACOS}
+  {$IFEND}
+  {$IF DEFINED(MACOS) or DEFINED(DARWIN)}
+  // MacOSX from Ref\beaengine-5.3.0\darwin\BeaEngine.xcodeproj + XCode 14
     {$IF DEFINED(IOS) or DEFINED(MACOS64)}
   BeaEngineLib   = '/usr/lib/libBeaEngine.dylib';
     {$ELSE}
   BeaEngineLib   = 'libBeaEngine.dylib';
     {$IFEND}
-  {$ENDIF}
-  {$IF DEFINED(FPC) and DEFINED(DARWIN)}
-  BeaEngineLib   = 'libBeaEngine.dylib';
-  {$LINKLIB libBeaEngine}
   {$IFEND}
-  {$IFDEF ANDROID}
-  BeaEngineLib   = 'libBeaEngine.so';
-  {$ENDIF}
 {$ENDIF BE_STATICLINK}
 
 {$IFDEF BE_EXP_UNDERSCORE}

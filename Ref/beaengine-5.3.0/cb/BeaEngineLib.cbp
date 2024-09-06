@@ -56,13 +56,14 @@
 				<Option working_dir="" />
 				<Option object_output="arm-linux/" />
 				<Option type="2" />
-				<Option compiler="arm-linux-androideabi" />
+				<Option compiler="arm-linux-gnueabihf" />
 				<Option createDefFile="1" />
 				<Compiler>
 					<Add option="-O2" />
 					<Add option="-Wall" />
 					<Add option="-mfloat-abi=hard" />
 					<Add option="-mfpu=vfpv3-d16" />
+					<Add option="-std=c11" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -74,7 +75,16 @@
 				<Option object_output="bcc32/" />
 				<Option type="2" />
 				<Option compiler="bcb-win32" />
-				<Option createDefFile="1" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+			</Target>
+			<Target title="bcb-win64">
+				<Option output="bcc64/BeaEngineLib" prefix_auto="1" extension_auto="1" />
+				<Option working_dir="" />
+				<Option object_output="bcc64/" />
+				<Option type="2" />
+				<Option compiler="bcb-win64" />
 				<Compiler>
 					<Add option="-O2" />
 				</Compiler>
@@ -101,7 +111,7 @@
 				<Option working_dir="" />
 				<Option object_output="i386-win32/" />
 				<Option type="2" />
-				<Option compiler="gcc" />
+				<Option compiler="x86_64-w64-mingw32" />
 				<Option createDefFile="1" />
 				<Compiler>
 					<Add option="-O2" />
@@ -150,7 +160,7 @@
 				<Option working_dir="" />
 				<Option object_output="x86_64-win64/" />
 				<Option type="2" />
-				<Option compiler="gcc" />
+				<Option compiler="x86_64-w64-mingw32" />
 				<Option createDefFile="1" />
 				<Compiler>
 					<Add option="-O2" />
@@ -164,7 +174,7 @@
 			</Target>
 		</Build>
 		<VirtualTargets>
-			<Add alias="all" targets="aarch64-android;aarch64-linux;arm-android;arm-linux;bcb-win32;i386-linux;i386-win32;loongarch64-linux;x86_64-linux;x86_64-win64;" />
+			<Add alias="all" targets="aarch64-android;aarch64-linux;arm-android;arm-linux;bcb-win32;bcb-win64;i386-linux;i386-win32;loongarch64-linux;x86_64-linux;x86_64-win64;" />
 		</VirtualTargets>
 		<Compiler>
 			<Add option="-DBEA_ENGINE_STATIC" />

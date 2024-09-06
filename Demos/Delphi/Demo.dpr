@@ -5,6 +5,7 @@
 {  Unit Name: Demo                                      }
 {     Author: Lsuper 2024.06.01                         }
 {    Purpose: Demo                                      }
+{    License: Mozilla Public License 2.0                }
 {                                                       }
 {  Copyright (c) 1998-2024 Super Studio                 }
 {                                                       }

@@ -1,0 +1,28 @@
+{
+	"search_pathes": [
+		{
+			"pathes": "Source",
+			"platforms": "Win32;Win64;OSX64;OSXARM64;Android;Android64;Linux64"
+		}
+	],
+	"browsing_pathes": [
+		{
+			"pathes": "Source",
+			"platforms": "Win32;Win64;OSX64;OSXARM64;Android;Android64;Linux64"
+		}
+	],
+	"source_folders": [
+		{
+			"folder": "Source",
+			"base": "",
+			"recursive": true,
+			"filter": "*;*.*"
+		}
+	],
+	"projects": [
+		{
+			"project": "Demos\\Delphi\\Demo.dproj",
+			"compiler_min": 23
+		}
+	]
+}

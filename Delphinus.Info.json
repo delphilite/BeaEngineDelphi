@@ -1,0 +1,11 @@
+{
+	"id": "{BEA58FDC-88C7-42D1-AE3D-78231ADC231E}",
+	"name": "BeaEngineDelphi",
+	"picture": "Ref\\Doc\\Logo.png",
+	"license_type": "MPL-2.0",
+	"license_file": "License",
+	"platforms": "Win32;Win64;OSX64;OSXARM64;Android;Android64;Linux64",
+	"first_version": "5.3.0",
+	"package_compiler_min": 23,
+	"compiler_min": 23
+}

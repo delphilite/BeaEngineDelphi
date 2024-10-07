@@ -1,4 +1,9 @@
 # BeaEngineDelphi
+![Version](https://img.shields.io/badge/version-v5.3.0-yellow.svg)
+![License](https://img.shields.io/github/license/delphilite/BeaEngineDelphi)
+![Lang](https://img.shields.io/github/languages/top/delphilite/BeaEngineDelphi.svg)
+![stars](https://img.shields.io/github/stars/delphilite/BeaEngineDelphi.svg)
+
 BeaEngineDelphi is a [Delphi](http://www.embarcadero.com/products/delphi) and [Free Pascal](https://www.freepascal.org/) binding for the [BeaEngine](https://github.com/BeaEngine/beaengine/). It supports BeaEngine and provides a friendly and simple type-safe API that is ridiculously easy to learn and quick to pick up.
 
 BeaEngine is a C library designed to decode instructions from 16 bits, 32 bits and 64 bits intel architectures. It includes standard instructions set and instructions set from FPU, MMX, SSE, SSE2, SSE3, SSSE3, SSE4.1, SSE4.2, VMX, CLMUL, AES, MPX, AVX, AVX2, AVX512 (VEX & EVEX prefixes), CET, BMI1, BMI2, SGX, UINTR, KL, TDX and AMX extensions. If you want to analyze malicious codes and more generally obfuscated codes, BeaEngine sends back a complex structure that describes precisely the analyzed instructions.
@@ -9,7 +14,7 @@ BeaEngine is a C library designed to decode instructions from 16 bits, 32 bits a
 * **Supports** Static libraries: i386-win32, x86_64-win64, i386-linux, x86_64-linux, arm-linux, aarch64-linux, x86_64-darwin, aarch64-darwin, arm-android, aarch64-android, loongarch64-linux.
 * **Supports** Dynamic libraries: i386-win32, x86_64-win64, x86_64-darwin, aarch64-darwin.
 
-## Installation
+## Installation: Manual
 To install the BeaEngineDelphi binding, follow these steps:
 
 1. Clone the repository:
@@ -18,6 +23,11 @@ To install the BeaEngineDelphi binding, follow these steps:
     ```
 
 2. Add the BeaEngineDelphi\Source directory to the project or IDE's search path.
+
+## Installation: Delphinus-Support
+BeaEngineDelphi should now be listed in Delphinus package manager.
+
+Be sure to restart Delphi after installing via Delphinus otherwise the units may not be found in your test projects.
 
 ## Usage
 Included is the wrapper record `TDisasm` in `BeaEngineDelphi.pas`. The example bellow is incomplete, but it may give you an impression how to use it.

@@ -25,7 +25,7 @@ To install the BeaEngineDelphi binding, follow these steps:
 2. Add the BeaEngineDelphi\Source directory to the project or IDE's search path.
 
 ## Installation: Delphinus-Support
-BeaEngineDelphi should now be listed in Delphinus package manager.
+BeaEngineDelphi should now be listed in [Delphinus package manager](https://github.com/Memnarch/Delphinus/wiki/Installing-Delphinus).
 
 Be sure to restart Delphi after installing via Delphinus otherwise the units may not be found in your test projects.
 

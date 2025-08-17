@@ -21,8 +21,8 @@
 	],
 	"projects": [
 		{
-			"project": "Demos\\Delphi\\Demo.dproj",
-			"compiler_min": 23
+			"project": "Demos\\HookUtils\\Demo.dproj",
+			"compiler_min": 15
 		}
 	]
 }
